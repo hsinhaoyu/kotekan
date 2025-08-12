@@ -2,7 +2,7 @@
 
 #(use-modules (srfi srfi-1))
 
-#(define MEASURES_PER_SYSTEM 8)
+#(define MEASURES_PER_SYSTEM 4)
 #(define system-counter 0)
 #(define notes-by-system (make-hash-table))
 
@@ -34,6 +34,75 @@ autoBreakEngraver =
                  (col (ly:context-property ctx 'currentCommandColumn)))
             (when (ly:grob? col)
               (ly:grob-set-property! col 'line-break-permission 'force))))))))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
+#(define (create-auto-grid grob)
+  "Create a grid using notes collected for this specific system"
+  (let* ((staff-space 1.0)
+         (thickness 0.1)
+         (pitches (length reyong_notes_low))
+         (beats-per-measure 16)
+         (cell-size staff-space)
+         (current-system system-counter)
+         (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
+         (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
+         (grid-height (* pitches cell-size))
+         (system-notes (hash-ref notes-by-system current-system '()))
+         (stencils '()))
+    
+    ; Increment counter for next system
+    (set! system-counter (+ system-counter 1))
+        
+    ; Draw horizontal lines
+    (do ((i 0 (1+ i)))
+        ((> i pitches))
+      (let* ((y-pos (* (- (/ pitches 2) i) cell-size))
+             (line (ly:round-filled-box
+                    (cons 0 grid-width)
+                    (cons (- (* thickness 0.5)) (* thickness 0.5))
+                    0)))
+        (set! stencils
+              (cons (ly:stencil-translate-axis line y-pos Y)
+                    stencils))))
+    
+    ; Draw vertical lines for beats
+    (do ((i 0 (1+ i)))
+        ((> i (* MEASURES_PER_SYSTEM beats-per-measure)))
+      (let* ((x-pos (* i cell-size))
+             (line-thickness (if (= (modulo i beats-per-measure) 0) 
+                               (* thickness 2) 
+                               thickness))
+             (line (ly:round-filled-box
+                    (cons (- (* line-thickness 0.5)) (* line-thickness 0.5))
+                    (cons (- (/ grid-height 2)) (/ grid-height 2))
+                    0)))
+        (set! stencils
+              (cons (ly:stencil-translate-axis line x-pos X)
+                    stencils))))
+    
+    ; Fill cells for notes in this system
+    ;(for-each
+    ;  (lambda (note-info)
+    ;    (let* ((measure-num (car note-info))
+    ;           (beat-in-measure (cadr note-info))
+    ;           (pitch-index (caddr note-info))
+    ;           (relative-measure (- measure-num system-start-measure))
+    ;           (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
+    ;           (x-pos (* relative-beat cell-size))
+    ;           ; Map pitch-index to grid coordinates: scale to fit within 12-row grid
+    ;           (normalized-pitch (modulo pitch-index pitches))
+    ;           (y-pos (* (- (/ pitches 2) normalized-pitch) cell-size))
+    ;           (cell (ly:round-filled-box
+    ;                  (cons 0 cell-size)
+    ;                  (cons 0 cell-size)
+    ;                  0))
+    ;           (filled-cell (ly:stencil-translate-axis
+    ;                        (ly:stencil-translate-axis cell x-pos X)
+    ;                        y-pos Y)))
+    ;      (set! stencils (cons filled-cell stencils))))
+    ;  system-notes)
+    
+    (apply ly:stencil-add stencils)))
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Gather notes into a hash table
@@ -96,8 +165,8 @@ note_collector_engraver =
       (ly:grob-set-property! grob 'stencil empty-stencil)))))
 
 gridStaff = {
-  %\override Staff.StaffSymbol.stencil = #create-auto-grid
-  \override Staff.StaffSymbol.line-count = (length reyong_notes_low)
+  \override Staff.StaffSymbol.stencil = #create-auto-grid
+  \override Staff.StaffSymbol.line-count = #(length reyong_notes_low)
   \override Staff.StaffSymbol.staff-space = #1.0
   
   % Hide all traditional notation elements
