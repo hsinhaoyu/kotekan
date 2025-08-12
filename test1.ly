@@ -36,6 +36,31 @@ autoBreakEngraver =
               (ly:grob-set-property! col 'line-break-permission 'force))))))))
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Gather notes into a hash table
+
+#(define (pitch->components p)
+   (list (ly:pitch-notename p)
+         (ly:pitch-alteration p)
+         (ly:pitch-octave p)))
+
+#(define reyong_notes_low
+  (list 
+    #{ cis'  #}
+    #{ eis'  #}
+    #{ fis'  #}
+    #{ ais'  #}
+    #{ b'    #}
+    #{ cis'' #}))
+
+#(define reyong_notes_components
+    (map pitch->components reyong_notes_low))
+
+#(define reyong_note_idx
+  (lambda (notename alteration octave)
+    (list-index
+      (lambda (x) (equal? x (list notename alteration octave)))
+       reyong_notes_components)))
+
 % It is attached to the Staff context. It is run in the music interpretation phase
 note_collector_engraver =
 #(make-engraver
@@ -46,6 +71,7 @@ note_collector_engraver =
            (notename (ly:pitch-notename pitch))
 	   (alteration (ly:pitch-alteration pitch))
            (octave (ly:pitch-octave pitch))
+	   (note-index (reyong_note_idx notename alteration octave))
            (context (ly:translator-context engraver))
            (measure-num (ly:context-property context 'currentBarNumber 1))
            (moment (ly:context-current-moment context))
@@ -57,7 +83,7 @@ note_collector_engraver =
 	   (voice-context (ly:translator-context source-engraver))
 	   (voice-id (ly:context-id voice-context))
 	   ; All the info needed
-	   (all-info (list measure-num beat-in-measure notename alteration octave voice-id)))
+	   (all-info (list measure-num beat-in-measure voice-id note-index)))
       
       ; Store note in the appropriate system
       (let* ((current-notes (hash-ref notes-by-system system-num '()))
@@ -71,7 +97,7 @@ note_collector_engraver =
 
 gridStaff = {
   %\override Staff.StaffSymbol.stencil = #create-auto-grid
-  \override Staff.StaffSymbol.line-count = #13
+  \override Staff.StaffSymbol.line-count = (length reyong_notes_low)
   \override Staff.StaffSymbol.staff-space = #1.0
   
   % Hide all traditional notation elements
@@ -123,12 +149,9 @@ gridStaff = {
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
       
       \gridStaff
-      instrumentName = "Reyong"
   }  {
       <<
-          \new Voice = "polos" \with {
-              \consists #(Voice_color_engraver (rgb-color 0 0 1))  % Blue
-          } {
+          \new Voice = "polos" {
             \voiceOne
             \polos
           }
@@ -148,9 +171,7 @@ gridStaff = {
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
           \consists \note_collector_engraver
-      }
-      
+      }      
       indent = 0
   }
-
 }
