@@ -62,7 +62,9 @@ autoBreakEngraver =
                     (cons (- (* thickness 0.5)) (* thickness 0.5))
                     0)))
         (set! stencils
-              (cons (ly:stencil-translate-axis line y-pos Y)
+              (cons (stencil-with-color
+	                (ly:stencil-translate-axis line y-pos Y)
+		        (rgb-color 0.1 0.1 0.1))
                     stencils))))
     
     ; Draw vertical lines for beats
@@ -77,30 +79,31 @@ autoBreakEngraver =
                     (cons (- (/ grid-height 2)) (/ grid-height 2))
                     0)))
         (set! stencils
-              (cons (ly:stencil-translate-axis line x-pos X)
+              (cons (stencil-with-color
+	                (ly:stencil-translate-axis line x-pos X)
+			(rgb-color 0.1 0.1 0.1))
                     stencils))))
     
     ; Fill cells for notes in this system
-    ;(for-each
-    ;  (lambda (note-info)
-    ;    (let* ((measure-num (car note-info))
-    ;           (beat-in-measure (cadr note-info))
-    ;           (pitch-index (caddr note-info))
-    ;           (relative-measure (- measure-num system-start-measure))
-    ;           (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
-    ;           (x-pos (* relative-beat cell-size))
-    ;           ; Map pitch-index to grid coordinates: scale to fit within 12-row grid
-    ;           (normalized-pitch (modulo pitch-index pitches))
-    ;           (y-pos (* (- (/ pitches 2) normalized-pitch) cell-size))
-    ;           (cell (ly:round-filled-box
-    ;                  (cons 0 cell-size)
-    ;                  (cons 0 cell-size)
-    ;                  0))
-    ;           (filled-cell (ly:stencil-translate-axis
-    ;                        (ly:stencil-translate-axis cell x-pos X)
-    ;                        y-pos Y)))
-    ;      (set! stencils (cons filled-cell stencils))))
-    ;  system-notes)
+    (for-each
+      (lambda (note-info)
+        (let* ((measure-num (car note-info))
+               (beat-in-measure (cadr note-info))
+               (voice-id (caddr note-info))
+	       (note-idx (cadddr note-info))
+               (relative-measure (- measure-num system-start-measure))
+               (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
+               (x-pos (* relative-beat cell-size))
+               (y-pos (* (- note-idx 3) cell-size))
+               (cell (ly:round-filled-box
+                      (cons 0 cell-size)
+                      (cons 0 cell-size)
+                      0))
+               (filled-cell (ly:stencil-translate-axis
+                            (ly:stencil-translate-axis cell x-pos X)
+                            y-pos Y)))
+          (set! stencils (cons filled-cell stencils))))
+      system-notes)
     
     (apply ly:stencil-add stencils)))
 
@@ -145,7 +148,7 @@ note_collector_engraver =
            (measure-num (ly:context-property context 'currentBarNumber 1))
            (moment (ly:context-current-moment context))
            (beat-pos (ly:moment-main moment))
-           (beat-in-measure (modulo (inexact->exact (floor (* beat-pos 4))) 4))
+           (beat-in-measure (modulo (inexact->exact (floor (* beat-pos 16))) 16))
            ; Calculate which system this note belongs to
            (system-num (quotient (- measure-num 1) MEASURES_PER_SYSTEM))
 	   ; Get the voice id
