@@ -39,19 +39,29 @@ polos = \relative {
       \key a \major
 
       r16  a'16	i8
-      a16  i8	a16
-      i8   a16	i16
-      r16  i16	a16	a16
+      a16  i8	     a16
+      i8        a16  i16
+      r16  i16	a16  i16    |
+
+      i16  u16  a8
+      u16  a8        u16
+      a8        u16  a16
+      r16  u16  a8
 }
 
 
 sangsih = \relative {
       \key a \major
 
-      o'8  e16	o16
+      o'8       e16  o16
       r16  e16	o8
-      e16  o8	e16
-      o16  e8	e16
+      e16  o8	     e16
+      o16  e8	     e16  |
+
+      e16  e16  e16  i16
+      r16  e16  i8
+      i16  e8        i16
+      e8        i16  e16
 
 }
 
@@ -110,14 +120,14 @@ reyong_notes = {
 \score {
     \new StaffGroup <<
         \new Staff \with {
-            instrumentName = "Polos (P)"
-            shortInstrumentName = "P."
-        } { \voiceOne \polos }
-
-        \new Staff \with {
             instrumentName = "Sangsih (S)"
             shortInstrumentName = "S."
-        } { \voiceTwo \sangsih }
+        } { \voiceOne \stemDown \sangsih }
+
+        \new Staff \with {
+            instrumentName = "Polos (P)"
+            shortInstrumentName = "P."
+        } { \voiceTwo \stemUp \polos }
     >>
 
     \layout {}
@@ -131,27 +141,27 @@ reyong_notes = {
 
 \score {
     \new Staff \with {
-        instrumentName = "P. + S."
+        instrumentName = " S. + P."
     } {
     <<
 	\new Voice = "polos" \with {
-	    \consists #(voice_color_engraver (square-color "polos"))
+	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
 	} {
-	  \polos
+	  \stemDown \polos
 	}
 
 	\new Voice = "sangsih" \with {
-	    \consists #(voice_color_engraver (square-color "sangsih"))
+	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
 	} {
-	  \sangsih
+	  \stemUp \sangsih
 	}
     >>
     }
     \layout {
-        \context {
-    	    \Voice
-    	    \override Rest.transparent = ##t
-        }
+        %\context {
+    	%    \Voice
+    	%    \override Rest.transparent = ##t
+        %}
     }
 }
 
