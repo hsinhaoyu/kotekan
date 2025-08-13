@@ -99,7 +99,7 @@ autoBreakEngraver =
                       (cons 0 cell-size)
                       (cons 0 cell-size)
                       0))
-	       (cell (stencil-with-color cell (rgb-color 1.0 0.0 0.0)))
+	       (cell (stencil-with-color cell (rgb-color 0.678 0.88 0.898)))
                (filled-cell (ly:stencil-translate-axis
                             (ly:stencil-translate-axis cell x-pos X)
                             y-pos Y)))
