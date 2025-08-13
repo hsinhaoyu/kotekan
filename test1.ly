@@ -21,6 +21,21 @@ polos = \relative  {
       r16 eis16 fis8
 }
 
+sangsih = \relative  {
+      \key fis \major
+      \time 4/4
+
+      b'8 cis16 b16
+      r16 cis16 b8
+      cis16 b8 cis16
+      b16 cis8 cis16
+
+      cis16 cis16 cis16 ais16
+      r16 cis16 ais8
+      cis16 ais8 cis16
+      ais8 cis16 ais16
+}
+
 % This engraver is attached to the Score context
 autoBreakEngraver =
 #(let ((count 0))
@@ -36,6 +51,13 @@ autoBreakEngraver =
               (ly:grob-set-property! col 'line-break-permission 'force))))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
+
+#(define (square-color voice-id)
+  (cond
+    ((string=? voice-id "polos") (rgb-color 0.678 0.88 0.898))
+    ((string=? voice-id "sangsih") (rgb-color 0.980 0.500 0.564))
+    (else (rgb-color 0.5 0.5 0.5))))
+
 #(define (create-auto-grid grob)
   "Create a grid using notes collected for this specific system"
   (let* ((staff-space 1.0)
@@ -54,6 +76,7 @@ autoBreakEngraver =
     (set! system-counter (+ system-counter 1))
         
     ; Draw horizontal lines
+    (display "HERE")
     (do ((i 0 (1+ i)))
         ((> i pitches))
       (let* ((y-pos (* (- (/ pitches 2) i) cell-size))
@@ -94,12 +117,12 @@ autoBreakEngraver =
                (relative-measure (- measure-num system-start-measure))
                (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
                (x-pos (* relative-beat cell-size))
-               (y-pos (* (- note-idx 3) cell-size))
+               (y-pos (* (- note-idx (/ (length reyong_notes_low) 2)) cell-size))
                (cell (ly:round-filled-box
                       (cons 0 cell-size)
                       (cons 0 cell-size)
                       0))
-	       (cell (stencil-with-color cell (rgb-color 0.678 0.88 0.898)))
+	       (cell (stencil-with-color cell (square-color voice-id)))
                (filled-cell (ly:stencil-translate-axis
                             (ly:stencil-translate-axis cell x-pos X)
                             y-pos Y)))
@@ -123,7 +146,8 @@ autoBreakEngraver =
     #{ fis'  #}
     #{ ais'  #}
     #{ b'    #}
-    #{ cis'' #}))
+    #{ cis'' #}
+    #{ eis'' #}))
 
 #(define reyong_notes_components
     (map pitch->components reyong_notes_low))
@@ -161,9 +185,9 @@ note_collector_engraver =
       ; Store note in the appropriate system
       (let* ((current-notes (hash-ref notes-by-system system-num '()))
              (new-note all-info))
-	(display "\n")
-	(display new-note)
-	(display "\n")
+	;(display "\n")
+	;(display new-note)
+	;(display "\n")
         (hash-set! notes-by-system system-num (cons new-note current-notes)))
       
       (ly:grob-set-property! grob 'stencil empty-stencil)))))
@@ -228,6 +252,10 @@ gridStaff = {
             \voiceOne
             \polos
           }
+          \new Voice = "sangsih" {
+            \voiceTwo
+            \sangsih
+          }	  
       >>
   }
 
