@@ -22,7 +22,8 @@
     #{ a'  #}
     #{ i'  #}
     #{ o'  #}
-    #{ e'' #}))
+    #{ e'' #}
+    #{ u'' #}))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -50,7 +51,7 @@ autoBreakEngraver =
 
 #(define (create-auto-grid grob)
   "Create a grid using notes collected for this specific system"
-  (let* ((staff-space 1.0)
+  (let* ((staff-space 2.0)
          (thickness 0.1)
          (pitches (length reyong_notes_low))
          (beats-per-measure 16)
@@ -241,7 +242,7 @@ reyong_notes = {
     u'''4^\markup{\center-align{u}}
 }
 
-#(define (reyong_note_idx mu)
+
    (let* ((components (map pitch->components reyong_notes_low))
           (target (ly:music-property mu 'pitch))
 	  (target (pitch->components target)))
@@ -266,7 +267,7 @@ reyong_notes = {
 
 \markup {
   \column {
-    \line { "Example" \italic "Kotekan" "(interlocked melodies) from McPhee, C. (1940)" }
+    \line { "Example of" \italic "Kotekan" "(interlocked melodies) from McPhee, C. (1940)" }
     \vspace #1
   }
 }
@@ -314,4 +315,50 @@ reyong_notes = {
 }
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
 
+
+\markup {
+  \column {
+    \line { "The Reyong Kotekan in grid format" }
+    \vspace #2
+  }
+}
+
+
+\score {
+  \new Staff \with {
+      % Setting parameters for the Staff context
+      % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
+      
+      \gridStaff
+  }  {
+      <<
+          \new Voice = "polos" {
+            \voiceOne
+            \polos
+          }
+          \new Voice = "sangsih" {
+            \voiceTwo
+            \sangsih
+          }	  
+      >>
+  }
+
+  \layout {
+      \context {
+          % Add the autoBreakEngraver engraver to the Score context.
+	  % It breaks the music into systems
+          \Score
+	  \consists \autoBreakEngraver
+      }
+
+      \context {
+          % Add the note_collector_engraver to the Staff context
+	  % It disables plotting traditional notes, and saves all pitch information in a hash table
+          \Staff
+          \consists \note_collector_engraver
+      }      
+      indent = 0
+  }
+}
