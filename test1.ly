@@ -2,7 +2,7 @@
 
 #(use-modules (srfi srfi-1))
 
-#(define MEASURES_PER_SYSTEM 4)
+#(define MEASURES_PER_SYSTEM 2)
 #(define system-counter 0)
 #(define notes-by-system (make-hash-table))
 
@@ -91,6 +91,7 @@ autoBreakEngraver =
                     stencils))))
     
     ; Draw vertical lines for beats
+    (display "HERE2")
     (do ((i 0 (1+ i)))
         ((> i (* MEASURES_PER_SYSTEM beats-per-measure)))
       (let* ((x-pos (* i cell-size))
@@ -106,6 +107,7 @@ autoBreakEngraver =
 	                (ly:stencil-translate-axis line x-pos X)
 			(rgb-color 0.1 0.1 0.1))
                     stencils))))
+    (display "HERE3")
     
     ; Fill cells for notes in this system
     (for-each

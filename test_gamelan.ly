@@ -35,27 +35,6 @@
       ((note-head-interface engraver grob source-engraver)
        (ly:grob-set-property! grob 'color voice-color))))))
 
-
-polos_display = \relative  {
-      \key a \major
-
-      r16  a'16	i8
-      a16  i8	a16
-      i8   a16	i16
-      r16  i16	a16	a16
-}
-
-
-sangsih_display = \relative  {
-      \key a \major
-
-      o'8  e16	o16
-      r16  e16	o8
-      e16  o8	e16
-      o16  e8	e16
-
-}
-
 polos = \relative {
       \key a \major
 
@@ -107,27 +86,62 @@ reyong_notes = {
 	  (target (pitch->components target)))
 	(list-index (lambda (x) (equal? x target)) components)))
 
+\markup {
+  \column {
+    \vspace #1 
+    \line { "Approximate" \italic "Pelog" "scale for the" \italic "Reyong" }
+    \vspace #1
+  }
+}
+
 \score {
-    <<
-        \new Staff = "sangsih" \sangsih_display
-        \new Staff = "polos" \polos_display
+    \new Staff \reyong_notes
+
+    \layout {}
+}
+
+\markup {
+  \column {
+    \line { "Example" \italic "Kotekan" "(interlocked melodies) from McPhee, C. (1940)" }
+    \vspace #1
+  }
+}
+
+\score {
+    \new StaffGroup <<
+        \new Staff \with {
+            instrumentName = "Polos (P)"
+            shortInstrumentName = "P."
+        } { \voiceOne \polos }
+
+        \new Staff \with {
+            instrumentName = "Sangsih (S)"
+            shortInstrumentName = "S."
+        } { \voiceTwo \sangsih }
     >>
 
     \layout {}
 }
 
+#(define (square-color voice-id)
+  (cond
+    ((string=? voice-id "polos") (rgb-color 0.678 0.88 0.898))
+    ((string=? voice-id "sangsih") (rgb-color 0.980 0.500 0.564))
+    (else (rgb-color 0.5 0.5 0.5))))
+
 \score {
-    \new Staff {
+    \new Staff \with {
+        instrumentName = "P. + S."
+    } {
     <<
 	\new Voice = "polos" \with {
-	     \consists #(voice_color_engraver (rgb-color 0 0 1))
+	    \consists #(voice_color_engraver (square-color "polos"))
 	} {
 	  \polos
 	}
 
-
 	\new Voice = "sangsih" \with {
-	     \consists #(voice_color_engraver (rgb-color 1 0 0))
+	    \consists #(voice_color_engraver (square-color "sangsih"))
 	} {
 	  \sangsih
 	}
@@ -141,18 +155,5 @@ reyong_notes = {
     }
 }
 
-\markup {
-  \vspace #2 
-
-  \bold "Notes for Reyong"
-  
-  \vspace #2
-}
-
-\score {
-    \new Staff \reyong_notes
-
-    \layout {}
-}
 
 
