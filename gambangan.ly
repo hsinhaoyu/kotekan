@@ -51,7 +51,7 @@ autoBreakEngraver =
 
 #(define (create-auto-grid grob)
   "Create a grid using notes collected for this specific system"
-  (let* ((staff-space 2.0)
+  (let* ((staff-space 1.0)
          (thickness 0.1)
          (pitches (length reyong_notes_low))
          (beats-per-measure 16)
@@ -149,6 +149,7 @@ note_collector_engraver =
 	   (alteration (ly:pitch-alteration pitch))
            (octave (ly:pitch-octave pitch))
 	   (note-index (reyong_note_idx notename alteration octave))
+	   (zz (display note-index))
            (context (ly:translator-context engraver))
            (measure-num (ly:context-property context 'currentBarNumber 1))
            (moment (ly:context-current-moment context))
@@ -197,34 +198,73 @@ gridStaff = {
       ((note-head-interface engraver grob source-engraver)
        (ly:grob-set-property! grob 'color voice-color))))))
 
-polos = \relative {
+polos = {
       \key a \major
 
-      r16  a'16	i8
-      a16  i8	     a16
-      i8        a16  i16
-      r16  i16	a16  i16    |
+      r16    a'16	i'8
+      a'16   i'8	        a'16
+      i'8    		a'16	i'16
+      r16    i'16	a'16	i'16    |
 
-      i16  u16  a8
-      u16  a8        u16
-      a8        u16  a16
-      r16  u16  a8
+      i'16   u'16	a'8
+      u'16   a'8		u'16
+      a'8    		u'16  	a'16
+      r16    u'16	a'8
 }
 
-sangsih = \relative {
+sangsih = {
       \key a \major
 
-      o'8       e16  o16
-      r16  e16	o8
-      e16  o8	     e16
-      o16  e8	     e16  |
+      o'8		e''16	o'16
+      r16    e''16	o'8
+      e''16  o'8		e''16
+      o'16   e''8	     	e''16  |
 
-      e16  e16  e16  i16
-      r16  e16  i8
-      i16  e8        i16
-      e8        i16  e16
+      e''16  e''16	e''16	i'16
+      r16    e''16	i'8
+      i'16   e''8		i'16
+      e''8   		i'16	e''16
 
 }
+
+%polos = \relative {
+%      \key a \major
+%
+%      r16  a'16	i8
+%      a16  i8	     a16
+%      i8        a16  i16
+%      r16  i16	a16  i16    |
+%
+%      r16  a16  i8
+%      a16  i8        a16
+%      i8        a16  i16
+%      r16  i16  a16  i16    |
+%
+%      i16  u16  a8
+%      u16  a8        u16
+%      a8        u16  a16
+%      r16  u16  a8          
+%}
+
+%sangsih = \relative {
+%      \key a \major
+%
+%      o'8       e16  o16
+%      r16  e16	o8
+%      e16  o8	     e16
+%      o16  e8	     e16    |
+%
+%      o8        e16  o16
+%      r16  e16  o8
+%      e16  o8        e16
+%      o16  e8        e16    |
+%
+%      o8        e16  o16
+%      r16  e16  o8
+%      e16  o8        e16
+%      o16  e8        e16    |
+%
+%}
 
 reyong_notes = {
     \key a \major
