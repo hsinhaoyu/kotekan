@@ -2,7 +2,7 @@
 
 #(use-modules (srfi srfi-1))
 
-#(define MEASURES_PER_SYSTEM 6)
+#(define MEASURES_PER_SYSTEM 2)
 #(define system-counter 0)
 #(define notes-by-system (make-hash-table))
 
