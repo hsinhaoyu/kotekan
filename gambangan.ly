@@ -2,7 +2,7 @@
 
 #(use-modules (srfi srfi-1))
 
-#(define MEASURES_PER_SYSTEM 2)
+#(define MEASURES_PER_SYSTEM 6)
 #(define system-counter 0)
 #(define notes-by-system (make-hash-table))
 
@@ -201,71 +201,84 @@ gridStaff = {
 polos = {
       \key a \major
 
+      % measure 1
       r16    a'16	i'8
       a'16   i'8	        a'16
       i'8    		a'16	i'16
       r16    i'16	a'16	i'16    |
 
+      % measure 2
       r16    a'16	i'8
       a'16   i'8		a'16
       i'8    		a'16	i'16
       r16    i'16	a'16	i'16    |
+      
+      % measure 3
+      i'16   u'16	a'8
+      u'16   a'8		u'16
+      a'8    		u'16	a'16
+      r16    u'16	a'8             |
+      
+      % measure 4
+      u'8    		a'16	u'16
+      r16    a'16	u'8
+      a'16   u'8		a'16
+      u'8    		u'16 	a'16    |
+      
+      % measure 5
+      r16    u'16	a'8
+      u'16   a'8		u'16
+      a'8    		u'16 	a'16
+      i'16    a'16	a'16    i'16    |
 
+      % measure 6
+      r16    e'16	u'8
+      e'16   u'8		e'16
+      u'8               e'16    u'16                
+      a'16   a'8                u'16    |
+      
 }
 
 sangsih = {
       \key a \major
 
+      % measure 1
       o'8		e''16	o'16
       r16    e''16	o'8
       e''16  o'8		e''16
       o'16   e''8	     	e''16  |
 
+      % measure 2
       o'8		e''16	o'16
       r16      e''16 	o'8
       e''16    o'8		e''16
-      o'16     e''8        	e''16 
+      o'16     e''8        	e''16  |
+      
+      % measure 3
+      e''8     		e''16	i'16
+      r16      e''16	i'8
+      e''16    i'8		e''16
+      i'8      		e''16	i'16   |
+      
+      % measure 4
+      r16      i'16 	e''8
+      i'16     e''8		i'16
+      e''8     		i'16	e''16
+      r16      i'16     r8
 
+      % measure 5
+      i'8		e''16	i'16
+      r16      e''16	i'8
+      e''16    i'8              e''16
+      r16      e''16     e''16  r16
+
+      % measure 6
+      a'8		i'16	a'16
+      r16      i'16	a'8
+      i'16     a'8		i'16
+      r16      e''16	i'8
 }
 
-%polos = \relative {
-%      \key a \major
-%
-%      r16  a'16	i8
-%      a16  i8	     a16
-%      i8        a16  i16
-%      r16  i16	a16  i16    |
-%
-%      r16  a16  i8
-%      a16  i8        a16
-%      i8        a16  i16
-%      r16  i16  a16  i16    |
-%
-%      i16  u16  a8
-%      u16  a8        u16
-%      a8        u16  a16
-%      r16  u16  a8          
-%}
-
-%sangsih = \relative {
-%      \key a \major
-%
-%      o'8       e16  o16
-%      r16  e16	o8
-%      e16  o8	     e16
-%      o16  e8	     e16    |
-%
-%      o8        e16  o16
-%      r16  e16  o8
-%      e16  o8        e16
-%      o16  e8        e16    |
-%
-%      o8        e16  o16
-%      r16  e16  o8
-%      e16  o8        e16
-%      o16  e8        e16    |
-%
-%}
 
 reyong_notes = {
     \key a \major
@@ -311,22 +324,6 @@ reyong_notes = {
     \line { "Example of" \italic "Kotekan" "(interlocked melodies) from McPhee, C. (1940)" }
     \vspace #1
   }
-}
-
-\score {
-    \new StaffGroup <<
-        \new Staff \with {
-            instrumentName = "Sangsih (S)"
-            shortInstrumentName = "S."
-        } { \voiceOne \stemDown \sangsih }
-
-        \new Staff \with {
-            instrumentName = "Polos (P)"
-            shortInstrumentName = "P."
-        } { \voiceTwo \stemUp \polos }
-    >>
-
-    \layout {}
 }
 
 \score {
