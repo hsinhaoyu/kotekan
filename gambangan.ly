@@ -2,7 +2,7 @@
 
 #(use-modules (srfi srfi-1))
 
-#(define MEASURES_PER_SYSTEM 2)
+#(define MEASURES_PER_SYSTEM 6)
 #(define system-counter 0)
 #(define notes-by-system (make-hash-table))
 
@@ -236,6 +236,54 @@ polos = {
       e'16   u'8		e'16
       u'8               e'16    u'16                
       a'16   a'8                u'16    |
+
+      % measure 7
+      r8		i'16	u'16
+      r8		i'16	u'16
+      r8		i'16	u'16
+      r8		i'16	u'16    |
+
+      % measure 8
+      r8		i'16	u'16
+      r8		i'16	u'16
+      r8		i'16	u'16
+      r8		i'16	u'16    |
+
+      % measure 9
+      r16    i'16    u'8
+      i'16   u'8		i'16
+      u'8    	     r16	u'16
+      r16    i'16    u'8
+
+      % measure 10
+      r16    a'16    i'8
+      a'16   i'8	        a'16
+      i'8    	     a'16	i'16
+      r16    a'8     		r16
+
+      % measure 11
+      r16    u'16    a'8
+      a'16   a'16    i'16	a'16
+      u'16   u'8    		u'16
+      a'16   a'16     u'16	a'16
+
+      % measure 12
+      r16    u'16    a'8
+      u'16   a'8		u'16
+      a'8   	     u'16	a'16
+      r16    a'16    u'16	a'16
+
+      % measure 13
+      r16    a'16    u'8
+      a'16   u'8                a'16
+      u'8    	     a'16	u'16
+      u'8	     u'16	a'16
+
+      % measure 14
+      a'8	     a'16	u'16
+      r16    a'16    u'8
+      a'16   a'16    u'8
+      r8             u'16	u'16
       
 }
 
@@ -277,6 +325,54 @@ sangsih = {
       r16      i'16	a'8
       i'16     a'8		i'16
       r16      e''16	i'8
+
+      % measure 7
+      e''8		e''8
+      e''8		e''8
+      e''8		e''8
+      e''8		e''8
+
+      % measure 8
+      e''8		e''8
+      e''8		e''8
+      e''8		e''8
+      e''8		e''8
+
+      % measure 9
+      e''8		r16	e''16
+      r8		e''8
+      r16	e''16	i'8
+      e''16	i'8		e''16
+
+      % measure 10
+      o'8		e''16	o'16
+      r16	e''16	o'8
+      e''16	o'8		e''16
+      o'16	e''16	o'16	e''16
+
+      % measure 11
+      i'16	i'8		i'16
+      e''16	e''8		e''16
+      r16	i'16	e''8
+      r16	i'8		e''16
+
+      % measure 12
+      i'8		e''16	i'16
+      r16	e''16	i'8
+      e''16     i'8             e''16	
+      i'16	e''8		e''16
+
+      % measure 13
+      i'8		e''16	i'16
+      r16	e''16	i'8
+      e''16	i'8		e''16
+      e''16	e''16   i'16	e''16
+
+      % measure 14
+      e''16	i'16	e''8
+      i'16	e''8		i'16
+      e''16	e''8		i'16
+      i'16	i'16	e''16	e''16
 }
 
 
