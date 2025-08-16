@@ -149,7 +149,6 @@ note_collector_engraver =
 	   (alteration (ly:pitch-alteration pitch))
            (octave (ly:pitch-octave pitch))
 	   (note-index (reyong_note_idx notename alteration octave))
-	   (zz (display note-index))
            (context (ly:translator-context engraver))
            (measure-num (ly:context-property context 'currentBarNumber 1))
            (moment (ly:context-current-moment context))
@@ -174,7 +173,7 @@ note_collector_engraver =
       (ly:grob-set-property! grob 'stencil empty-stencil)))))
 
 gridStaff = {
-  \override Staff.StaffSymbol.stencil = #create-auto-grid
+  \override Staff.StaffSymbol.stencil = ##f
   \override Staff.StaffSymbol.line-count = #(length reyong_notes_low)
   \override Staff.StaffSymbol.staff-space = #1.0
   
@@ -459,7 +458,6 @@ reyong_notes = {
   }
 }
 
-
 \score {
   \new Staff \with {
       % Setting parameters for the Staff context
@@ -485,6 +483,9 @@ reyong_notes = {
 	  % It breaks the music into systems
           \Score
 	  \consists \autoBreakEngraver
+      	  \override System.stencil = #create-auto-grid
+	  \override SystemStartBar.stencil = ##f
+    	  \override BarNumber.break-visibility = ##(#f #f #f)
       }
 
       \context {
@@ -492,7 +493,10 @@ reyong_notes = {
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
           \consists \note_collector_engraver
+	  \omit StaffSymbol
+
       }      
       indent = 0
   }
+
 }
