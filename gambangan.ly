@@ -3,7 +3,7 @@
 #(use-modules (srfi srfi-1))
 
 #(define MEASURES_PER_SYSTEM 6)
-#(define system-counter 0)
+#(define system-counter 1)
 #(define notes-by-system (make-hash-table))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Tuning
@@ -25,6 +25,22 @@
     #{ e'' #}
     #{ u'' #}))
 
+#(define reyong_notes
+  (list
+    #{ e'   #}
+    #{ u'   #}
+    #{ a'   #}
+    #{ i'   #}
+    #{ o'   #}
+    #{ e''  #}
+    #{ u''  #}
+    #{ a''  #}
+    #{ i''  #}
+    #{ o''  #}
+    #{ e''' #}
+    #{ u''' #}))
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % This engraver is attached to the Score context
@@ -45,24 +61,28 @@ autoBreakEngraver =
 
 #(define (square-color voice-id)
   (cond
-    ((string=? voice-id "polos") (rgb-color 0.678 0.88 0.898))
-    ((string=? voice-id "sangsih") (rgb-color 0.980 0.500 0.564))
+    ((string=? voice-id "polos_low") (rgb-color 0.678 0.88 0.898))
+    ((string=? voice-id "sangsih_low") (rgb-color 0.980 0.500 0.564))
+    ((string=? voice-id "polos_hi") (rgb-color 0.678 0.88 0.898))
+    ((string=? voice-id "sangsih_hi") (rgb-color 0.980 0.500 0.564))    
     (else (rgb-color 0.5 0.5 0.5))))
+
 
 #(define (create-auto-grid grob)
   "Create a grid using notes collected for this specific system"
   (let* ((staff-space 1.0)
          (thickness 0.1)
-         (pitches (length reyong_notes_low))
+         (pitches (length reyong_notes))
          (beats-per-measure 16)
          (cell-size staff-space)
-         (current-system system-counter)
+	 (num-systems (hash-count (const #t) notes-by-system))
+         (current-system (modulo system-counter num-systems))
          (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
          (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
          (grid-height (* pitches cell-size))
          (system-notes (hash-ref notes-by-system current-system '()))
          (stencils '()))
-    
+	     
     ; Increment counter for next system
     (set! system-counter (+ system-counter 1))
         
@@ -107,7 +127,7 @@ autoBreakEngraver =
                (relative-measure (- measure-num system-start-measure))
                (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
                (x-pos (* relative-beat cell-size))
-               (y-pos (* (- note-idx (/ (length reyong_notes_low) 2)) cell-size))
+               (y-pos (* (- note-idx (/ (length reyong_notes) 2)) cell-size))
                (cell (ly:round-filled-box
                       (cons 0 cell-size)
                       (cons 0 cell-size)
@@ -130,7 +150,7 @@ autoBreakEngraver =
          (ly:pitch-octave p)))
 
 #(define reyong_notes_components
-    (map pitch->components reyong_notes_low))
+    (map pitch->components reyong_notes))
 
 #(define reyong_note_idx
   (lambda (notename alteration octave)
@@ -172,9 +192,44 @@ note_collector_engraver =
       
       (ly:grob-set-property! grob 'stencil empty-stencil)))))
 
+#(define (get-all-grob-properties grob)
+   "Return an alist of all properties set on a grob"
+   (let* ((props '())
+          (add-prop (lambda (key val)
+                      (set! props (cons (cons key val) props)))))
+     
+     ;; We need to iterate through known property names
+     ;; since there's no direct way to get all properties
+     (let ((common-properties 
+            '(stencil color thickness 
+              X-offset Y-offset extra-offset 
+              staff-position direction
+              font-size font-name font-family
+              break-alignment break-align-symbols
+              spacing-wishes bounded-by-me
+              axis-group-parent-X axis-group-parent-Y
+              pure-Y-common pure-Y-offset-in-progress
+              cross-staff self-alignment-X self-alignment-Y
+              minimum-X-extent minimum-Y-extent
+              skyline-horizontal-padding
+              line-positions line-count
+              when rank
+              text markup)))
+       
+       (for-each 
+         (lambda (prop-name)
+           (let ((val (ly:grob-property grob prop-name)))
+             (if (not (eq? val '()))  ; Only add if property is set
+                 (add-prop prop-name val))))
+         common-properties))
+     
+     ;; Return the collected properties
+     (reverse props)))
+
+
 gridStaff = {
-  \override Staff.StaffSymbol.stencil = ##f
-  \override Staff.StaffSymbol.line-count = #(length reyong_notes_low)
+  \override Staff.StaffSymbol.stencil = #create-auto-grid
+  \override Staff.StaffSymbol.line-count = #(length reyong_notes)
   \override Staff.StaffSymbol.staff-space = #1.0
   
   % Hide all traditional notation elements
@@ -197,7 +252,7 @@ gridStaff = {
       ((note-head-interface engraver grob source-engraver)
        (ly:grob-set-property! grob 'color voice-color))))))
 
-polos = {
+polos_low = {
       \key a \major
 
       % measure 1
@@ -212,8 +267,8 @@ polos = {
       i'8    		a'16	i'16
       r16    i'16	a'16	i'16    |
       
-      % measure 3
-      i'16   u'16	a'8
+      % measure 3 (i'16)
+      r16   u'16	a'8
       u'16   a'8		u'16
       a'8    		u'16	a'16
       r16    u'16	a'8             |
@@ -251,7 +306,7 @@ polos = {
       % measure 9
       r16    i'16    u'8
       i'16   u'8		i'16
-      u'8    	     r16	u'16
+      u'8    	     i'16	u'16
       r16    i'16    u'8
 
       % measure 10
@@ -272,21 +327,21 @@ polos = {
       a'8   	     u'16	a'16
       r16    a'16    u'16	a'16
 
-      % measure 13
-      r16    a'16    u'8
-      a'16   u'8                a'16
-      u'8    	     a'16	u'16
-      u'8	     u'16	a'16
+%      % measure 13
+%      r16    a'16    u'8
+%      a'16   u'8                a'16
+%      u'8    	     a'16	u'16
+%      u'8	     u'16	a'16
 
       % measure 14
-      a'8	     a'16	u'16
-      r16    a'16    u'8
-      a'16   a'16    u'8
-      r8             u'16	u'16
+%      a'8	     a'16	u'16
+%      r16    a'16    u'8
+%      a'16   a'16    u'8
+%      r8             u'16	u'16
       
 }
 
-sangsih = {
+sangsih_low = {
       \key a \major
 
       % measure 1
@@ -301,8 +356,8 @@ sangsih = {
       e''16    o'8		e''16
       o'16     e''8        	e''16  |
       
-      % measure 3
-      e''8     		e''16	i'16
+      % measure 3 (e''8)
+      r8		e''16	i'16
       r16      e''16	i'8
       e''16    i'8		e''16
       i'8      		e''16	i'16   |
@@ -340,8 +395,8 @@ sangsih = {
       % measure 9
       e''8		r16	e''16
       r8		e''8
-      r16	e''16	i'8
-      e''16	i'8		e''16
+      r16	e''16	r8
+      e''16	r8		e''16
 
       % measure 10
       o'8		e''16	o'16
@@ -361,21 +416,174 @@ sangsih = {
       e''16     i'8             e''16	
       i'16	e''8		e''16
 
-      % measure 13
-      i'8		e''16	i'16
-      r16	e''16	i'8
-      e''16	i'8		e''16
-      e''16	e''16   i'16	e''16
+%      % measure 13
+%      i'8		e''16	i'16
+%      r16	e''16	i'8
+%      e''16	i'8		e''16
+%      e''16	e''16   i'16	e''16
 
       % measure 14
-      e''16	i'16	e''8
-      i'16	e''8		i'16
-      e''16	e''8		i'16
-      i'16	i'16	e''16	e''16
+%      e''16	i'16	e''8
+%      i'16	e''8		i'16
+%      e''16	e''8		i'16
+%      i'16	i'16	e''16	e''16
 }
 
+polos_hi = {
+      \key a \major
 
-reyong_notes = {
+      % measure 1
+      r16     a''16	i''8
+      a''16   i''8	        a''16
+      i''8    		a''16	i''16
+      r16     i''16	a''16	i''16    |
+
+      % measure 2
+      r16    a''16	i''8
+      a''16   i''8		a''16
+      i''8    		a''16	i''16
+      r16    i''16	a''16	i''16    |
+
+      % measure 3 (i''16)
+      r8		a''8
+      u''16   a''8		u''16
+      a''8    		u''16	a''16
+      r16    u''16	a''8             |
+
+      % measure 4
+      u''8    		a''16	u''16
+      r16    a''16	u''8
+      a''16   u''8		a''16
+      u''8    		u''16 	a''16    |
+
+      % measure 5
+      r16    u''16	a''8
+      u''16   a''8		u''16
+      a''8    		u''16 	a''16
+      i''16    a''16	a''16    i''16    |
+
+      % measure 6
+      r16    e''16	u''8
+      e''16   u''8		e''16
+      u''8               e''16    u''16                
+      a''16   a''8                u''16    |
+
+      % measure 7
+      r8		i''16	u''16
+      r8		i''16	u''16
+      r8		i''16	u''16
+      r8		i''16	u''16    |
+
+      % measure 8
+      r8		i''16	u''16
+      r8		i''16	u''16
+      r8		i''16	u''16
+      r8		i''16	u''16    |
+
+      % measure 9
+      r16    i''16    u''8
+      i''16   u''8		i''16
+      u''8    	     i''16	u''16
+      r16    i''16    u''8
+
+      % measure 10
+      r16    a''16    i''8
+      a''16   i''8	        a''16
+      i''8    	     a''16	i''16
+      r16    a''8     		r16
+
+      % measure 11
+      r16    u''16    a''8
+      a''16   a''16    i''16	a''16
+      u''16   u''8    		u''16
+      a''16   a''16     u''16	a''16
+
+      % measure 12
+      r16    u''16    a''8
+      u''16   a''8		u''16
+      a''8   	     u''16	a''16
+      r16    a''16    u''16	a''16
+}
+
+sangsih_hi = {
+      \key a \major
+
+      % measure 1
+      o''8		e'''16	o''16
+      r16    e'''16	o''8
+      e'''16  o''8		e'''16
+      o''16   e'''8	     	e'''16  |
+
+      % measure 2
+      o''8		e'''16	o''16
+      r16      e'''16 	o''8
+      e'''16    o''8		e'''16
+      o''16     e'''8        	e'''16  |
+
+      % measure 3 (e'''8)
+      r8     		e'''16	i''16
+      r16      e'''16	i''8
+      e'''16    i''8		e'''16
+      i''8      		e'''16	i''16   |
+
+      % measure 4
+      r16      i''16 	e'''8
+      i''16     e'''8		i''16
+      e'''8     		i''16	e'''16
+      r16      i''16     r8
+
+      % measure 5
+      i''8		e'''16	i''16
+      r16      e'''16	i''8
+      e'''16    i''8              e'''16
+      r16      e'''16     e'''16  r16
+
+      % measure 6
+      a''8		i''16	a''16
+      r16      i''16	a''8
+      i''16     a''8		i''16
+      r16      e'''16	i''8
+
+      % measure 7
+      e'''8		e'''16	u'''16
+      e'''8		e'''16   u'''16
+      e'''8		e'''16   u'''16
+      e'''8		e'''16   u'''16
+
+      % measure 8
+      e'''8		e'''16	u'''16
+      e'''8		e'''16   u'''16
+      e'''8		e'''16   u'''16
+      e'''8		e'''16   u'''16
+
+      % measure 9
+      e'''8		u'''16	e'''16
+      r16    u'''16	e'''8
+      u'''16	e'''16	r16     u'''16
+      e'''16	r16    u'''16		e'''16
+
+      % measure 10
+      o''8		e'''16	o''16
+      r16	e'''16	o''8
+      e'''16	o''8		e'''16
+      o''16	e'''16	o''16	e'''16
+
+      % measure 11
+      i''16	i''8		i''16
+      e'''16	e'''8		e'''16
+      r16	i''16	e'''8
+      r16	i''8		e'''16
+
+      % measure 12
+      i''8		e'''16	i''16
+      r16	e'''16	i''8
+      e'''16     i''8             e'''16	
+      i''16	e'''8		e'''16
+
+}      
+
+
+reyong_notes_display = {
     \key a \major
     e'4^\markup{\center-align{deng}}
     u'4^\markup{\center-align{dung}}
@@ -391,12 +599,6 @@ reyong_notes = {
     u'''4^\markup{\center-align{u}}
 }
 
-
-%   (let* ((components (map pitch->components reyong_notes_low))
-%          (target (ly:music-property mu 'pitch))
-%	  (target (pitch->components target)))
-%	(list-index (lambda (x) (equal? x target)) components)))
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
@@ -409,7 +611,7 @@ reyong_notes = {
 }
 
 \score {
-    \new Staff \reyong_notes
+    \new Staff \reyong_notes_display
 
     \layout {}
 }
@@ -421,31 +623,31 @@ reyong_notes = {
   }
 }
 
-\score {
-    \new Staff \with {
-        instrumentName = " S. + P."
-    } {
-    <<
-	\new Voice = "polos" \with {
-	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
-	} {
-	  \stemDown \polos
-	}
-
-	\new Voice = "sangsih" \with {
-	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
-	} {
-	  \stemUp \sangsih
-	}
-    >>
-    }
-    \layout {
-        %\context {
-    	%    \Voice
-    	%    \override Rest.transparent = ##t
-        %}
-    }
-}
+%\score {
+%    \new Staff \with {
+%        instrumentName = " S. + P."
+%    } {
+%    <<
+%	\new Voice = "polos_hi" \with {
+%	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
+%	} {
+%	  \stemUp \polos_hi
+%	}
+%
+%	\new Voice = "sangsih_hi" \with {
+%	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
+%	} {
+%	  \stemDown \sangsih_hi
+%	}
+%   >>
+%    }
+%    \layout {
+%        %\context {
+%    	%    \Voice
+%    	%    \override Rest.transparent = ##t
+%        %}
+%    }
+%}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
@@ -466,13 +668,21 @@ reyong_notes = {
       \gridStaff
   }  {
       <<
-          \new Voice = "polos" {
+          \new Voice = "polos_low" {
             \voiceOne
-            \polos
+            \polos_low
           }
-          \new Voice = "sangsih" {
+          \new Voice = "sangsih_low" {
             \voiceTwo
-            \sangsih
+            \sangsih_low
+          }
+          \new Voice = "polos_hi" {
+            \voiceThree
+            \polos_hi
+          }
+          \new Voice = "sangsih_hi" {
+            \voiceFour
+            \sangsih_hi
           }	  
       >>
   }
@@ -483,9 +693,6 @@ reyong_notes = {
 	  % It breaks the music into systems
           \Score
 	  \consists \autoBreakEngraver
-      	  \override System.stencil = #create-auto-grid
-	  \override SystemStartBar.stencil = ##f
-    	  \override BarNumber.break-visibility = ##(#f #f #f)
       }
 
       \context {
