@@ -5,7 +5,6 @@
 % Use the i, o, e, u, a for notenames
 #(ly:parser-set-note-names pelog-fis)
 
-#(display "hi")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #(define reyong_notes_low
