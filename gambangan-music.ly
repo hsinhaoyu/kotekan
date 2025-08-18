@@ -5,6 +5,7 @@
 % Use the i, o, e, u, a for notenames
 #(ly:parser-set-note-names pelog-fis)
 
+#(display "hi")
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 #(define reyong_notes_low
@@ -793,3 +794,35 @@ sangsih_hi = {
       r16	i''16	e'''8
       r16	i''8		r16	
 }      
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+high_register =
+    <<
+	\new Voice = "polos_hi" {
+	  \stemUp \polos_hi
+	}
+
+	\new Voice = "sangsih_hi" {
+	  \stemDown \sangsih_hi
+	}
+   >>
+
+all_voices =
+      <<
+          \new Voice = "polos_low" {
+            \voiceOne
+            \polos_low
+          }
+          \new Voice = "sangsih_low" {
+            \voiceTwo
+            \sangsih_low
+          }
+          \new Voice = "polos_hi" {
+            \voiceThree
+            \polos_hi
+          }
+          \new Voice = "sangsih_hi" {
+            \voiceFour
+            \sangsih_hi
+          }	  
+      >>

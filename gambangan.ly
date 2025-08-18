@@ -213,12 +213,12 @@ gridStaff = {
   \override BarLine.stencil = ##f
 }
 
-#(define voice_color_engraver
-  (lambda (voice-color)
-    (make-engraver
-     (acknowledgers
-      ((note-head-interface engraver grob source-engraver)
-       (ly:grob-set-property! grob 'color voice-color))))))
+%#(define voice_color_engraver
+%  (lambda (voice-color)
+%    (make-engraver
+%     (acknowledgers
+%      ((note-head-interface engraver grob source-engraver)
+%       (ly:grob-set-property! grob 'color voice-color))))))
 
 reyong_notes_display = {
     \key a \major
@@ -261,22 +261,10 @@ reyong_notes_display = {
 }
 
 \score {
-    \new Staff \with {
+   \new Staff \with {
         instrumentName = " S. + P."
-    } {
-    <<
-	\new Voice = "polos_hi" \with {
-	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
-	} {
-	  \stemUp \polos_hi
-	}
-
-	\new Voice = "sangsih_hi" \with {
-	    \consists #(voice_color_engraver (rgb-color 0.0 0.0 0.0))
-	} {
-	  \stemDown \sangsih_hi
-	}
-   >>
+   } {
+     \high_register
    }
     \layout {
         %\context {
@@ -288,7 +276,6 @@ reyong_notes_display = {
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
-
 
 \markup {
   \column {
@@ -304,24 +291,7 @@ reyong_notes_display = {
       
       \gridStaff
   }  {
-      <<
-          \new Voice = "polos_low" {
-            \voiceOne
-            \polos_low
-          }
-          \new Voice = "sangsih_low" {
-            \voiceTwo
-            \sangsih_low
-          }
-          \new Voice = "polos_hi" {
-            \voiceThree
-            \polos_hi
-          }
-          \new Voice = "sangsih_hi" {
-            \voiceFour
-            \sangsih_hi
-          }	  
-      >>
+     \all_voices
   }
 
   \layout {
