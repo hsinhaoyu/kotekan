@@ -44,51 +44,39 @@ reyong_notes_display = {
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-
-\markup {
-  \column {
-    \vspace #1 
-    \line { "Approximate" \italic "Pelog" "scale for the" \italic "Reyong" }
-    \vspace #1
-  }
-}
-
 \score {
     \new Staff \reyong_notes_display
-
+    
+    \header {
+        piece = "Approximate Pelog scale for the Reyong" 
+    }
+    
     \layout {}
 }
 
-\markup {
-  \column {
-    \line { "Example of" \italic "Kotekan" "(interlocked melodies) from McPhee, C. (1940)" }
-    \vspace #1
-  }
-}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \score {
    \new Staff \with {
         instrumentName = " S. + P."
    } {
-     \high_register
+     \sliceMusic #1 #4 \low_register
    }
-    \layout {
-        %\context {
-    	%    \Voice
-    	%    \override Rest.transparent = ##t
-        %}
-    }
+
+   \header {
+       piece = "Example of Kotekan (interlocked melodies) from McPhee, C. (1940)"
+   }
+   
+   \layout {
+        \context {
+    	    \Voice
+    	    \override Rest.transparent = ##t
+        }
+   }
 }
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
-
-\markup {
-  \column {
-    \line { "The Reyong Kotekan in grid format" }
-    \vspace #2
-  }
-}
 
 \score {
   \new Staff \with {
@@ -97,7 +85,11 @@ reyong_notes_display = {
       
       \gridStaff
   }  {
-     \all_voices
+     \sliceMusic #1 #4 \all_voices
+  }
+
+  \header {
+       piece = "The Reyong Kotekan in grid format"
   }
 
   \layout {
