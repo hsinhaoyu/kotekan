@@ -73,6 +73,17 @@ reyong_notes_display = {
     	    \override Rest.transparent = ##t
         }
    }
+
+}
+
+\score {
+   \new Staff {
+     \sliceMusic #8 #10 \all_voices
+   }
+
+   \midi {
+   	 \tempo 4 = 80
+   }
 }
 
 
