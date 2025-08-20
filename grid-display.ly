@@ -154,3 +154,22 @@ note_collector_engraver =
       
       (ly:grob-set-property! grob 'stencil empty-stencil)))))
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+gridStaff = {
+  \override Staff.StaffSymbol.stencil = #create-auto-grid
+  \override Staff.StaffSymbol.line-count = #(length reyong_notes)
+  \override Staff.StaffSymbol.staff-space = #1.0
+  
+  % Hide all traditional notation elements
+  \override NoteHead.stencil = ##f
+  \override Stem.stencil = ##f
+  \override Beam.stencil = ##f
+  \override Flag.stencil = ##f
+  \override Rest.stencil = ##f
+  \override Accidental.stencil = ##f
+  \override Clef.stencil = ##f
+  \override TimeSignature.stencil = ##f
+  \override KeySignature.stencil = ##f
+  \override BarLine.stencil = ##f
+}

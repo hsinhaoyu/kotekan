@@ -60,7 +60,7 @@ reyong_notes_display = {
    \new Staff \with {
         instrumentName = " S. + P."
    } {
-     \sliceMusic #1 #4 \low_register
+     \sliceMusic #7 #12 \low_register
    }
 
    \header {
@@ -76,9 +76,11 @@ reyong_notes_display = {
 
 }
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% MIDI
+
 \score {
    \new Staff {
-     \sliceMusic #8 #10 \all_voices
+     \sliceMusic #7 #12 \low_register
    }
 
    \midi {
@@ -96,7 +98,7 @@ reyong_notes_display = {
       
       \gridStaff
   }  {
-     \sliceMusic #1 #4 \all_voices
+     \sliceMusic #7 #12 \all_voices
   }
 
   \header {
