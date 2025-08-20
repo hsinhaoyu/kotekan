@@ -31,7 +31,7 @@ autoBreakEngraver =
     (else (rgb-color 0.5 0.5 0.5))))
 
 
-#(define (create-auto-grid grob)
+#(define (create-grid grob)
   "Create a grid using notes collected for this specific system"
   (let* ((staff-space 1.0)
          (thickness 0.1)
@@ -157,7 +157,7 @@ note_collector_engraver =
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 gridStaff = {
-  \override Staff.StaffSymbol.stencil = #create-auto-grid
+  \override Staff.StaffSymbol.stencil = #create-grid
   \override Staff.StaffSymbol.line-count = #(length reyong_notes)
   \override Staff.StaffSymbol.staff-space = #1.0
   
