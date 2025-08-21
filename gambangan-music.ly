@@ -17,7 +17,7 @@
     #{ e'' #}
     #{ u'' #}))
 
-#(define reyong_notes
+#(define REYONG-NOTES
   (list
     #{ e'   #}
     #{ u'   #}

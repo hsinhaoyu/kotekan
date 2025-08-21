@@ -1,4 +1,3 @@
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Global variables
 
 #(define system-counter 1)
@@ -34,13 +33,11 @@ autoBreakEngraver =
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
 
-
-
-#(define (create-grid grob)
+#(define (create-grid grob scale-notes)
   "Create a grid using notes collected for this specific system"
   (let* ((staff-space 1.0)
          (thickness 0.1)
-         (pitches (length reyong_notes))
+         (pitches (length scale-notes))
          (beats-per-measure 16)
          (cell-size staff-space)
 	 (num-systems (hash-count (const #t) notes-by-system))
@@ -95,7 +92,7 @@ autoBreakEngraver =
                (relative-measure (- measure-num system-start-measure))
                (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
                (x-pos (* relative-beat cell-size))
-               (y-pos (* (- note-idx (/ (length reyong_notes) 2)) cell-size))
+               (y-pos (* (- note-idx (/ (length scale-notes) 2)) cell-size))
                (cell (ly:round-filled-box
                       (cons 0 cell-size)
                       (cons 0 cell-size)
@@ -116,65 +113,56 @@ autoBreakEngraver =
          (ly:pitch-alteration p)
          (ly:pitch-octave p)))
 
-#(define reyong_notes_components
-    (map pitch->components reyong_notes))
-
-#(define reyong_note_idx
-  (lambda (notename alteration octave)
-    (list-index
-      (lambda (x) (equal? x (list notename alteration octave)))
-       reyong_notes_components)))
-
-% It is attached to the Staff context. It is run in the music interpretation phase
-note_collector_engraver =
-#(make-engraver
-  (acknowledgers
-   ((note-head-interface engraver grob source-engraver)
-    (let* ((note-event (ly:grob-property grob 'cause))
-           (pitch (ly:event-property note-event 'pitch))
-           (notename (ly:pitch-notename pitch))
-	   (alteration (ly:pitch-alteration pitch))
-           (octave (ly:pitch-octave pitch))
-	   (note-index (reyong_note_idx notename alteration octave))
-           (context (ly:translator-context engraver))
-           (measure-num (ly:context-property context 'currentBarNumber 1))
-           (moment (ly:context-current-moment context))
-           (beat-pos (ly:moment-main moment))
-           (beat-in-measure (modulo (inexact->exact (floor (* beat-pos 16))) 16))
-           ; Calculate which system this note belongs to
-           (system-num (quotient (- measure-num 1) MEASURES_PER_SYSTEM))
-	   ; Get the voice id
-	   (voice-context (ly:translator-context source-engraver))
-	   (voice-id (ly:context-id voice-context))
-	   ; All the info needed
-	   (all-info (list measure-num beat-in-measure voice-id note-index)))
-      
-      ; Store note in the appropriate system
-      (let* ((current-notes (hash-ref notes-by-system system-num '()))
-             (new-note all-info))
-	;(display "\n")
-	;(display new-note)
-	;(display "\n")
-        (hash-set! notes-by-system system-num (cons new-note current-notes)))
-      
-      (ly:grob-set-property! grob 'stencil empty-stencil)))))
+#(define (mk-note-collector scale-notes)
+  (let* ((scale-notes-components (map pitch->components scale-notes))
+         (note->index (lambda (notename alteration octave)
+                        (list-index
+			  (lambda (x) (equal? x (list notename alteration octave)))
+			  scale-notes-components))))
+    (make-engraver
+      (acknowledgers
+        ((note-head-interface engraver grob source-engraver)
+        (let* ((note-event (ly:grob-property grob 'cause))
+               (pitch (ly:event-property note-event 'pitch))
+               (notename (ly:pitch-notename pitch))
+	       (alteration (ly:pitch-alteration pitch))
+               (octave (ly:pitch-octave pitch))
+	       (note-index (note->index notename alteration octave))
+               (context (ly:translator-context engraver))
+               (measure-num (ly:context-property context 'currentBarNumber 1))
+               (moment (ly:context-current-moment context))
+               (beat-pos (ly:moment-main moment))
+               (beat-in-measure (modulo (inexact->exact (floor (* beat-pos 16))) 16))
+               ; Calculate which system this note belongs to
+               (system-num (quotient (- measure-num 1) MEASURES_PER_SYSTEM))
+	       ; Get the voice id
+	       (voice-context (ly:translator-context source-engraver))
+	       (voice-id (ly:context-id voice-context))
+	       ; All the info needed
+	       (all-info (list measure-num beat-in-measure voice-id note-index notename alteration octave))
+	       (current-notes (hash-ref notes-by-system system-num '())))
+	  (when note-index
+	      (hash-set! notes-by-system system-num (cons all-info current-notes)))
+	  (ly:grob-set-property! grob 'stencil empty-stencil)))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-gridStaff = {
-  \override Staff.StaffSymbol.stencil = #create-grid
-  \override Staff.StaffSymbol.line-count = #(length reyong_notes)
-  \override Staff.StaffSymbol.staff-space = #1.0
-  
-  % Hide all traditional notation elements
-  \override NoteHead.stencil = ##f
-  \override Stem.stencil = ##f
-  \override Beam.stencil = ##f
-  \override Flag.stencil = ##f
-  \override Rest.stencil = ##f
-  \override Accidental.stencil = ##f
-  \override Clef.stencil = ##f
-  \override TimeSignature.stencil = ##f
-  \override KeySignature.stencil = ##f
-  \override BarLine.stencil = ##f
-}
+gridStaffParams =
+#(define-music-function (scale-notes) (list?)
+  #{
+    \override Staff.StaffSymbol.stencil = #(lambda (grob) (create-grid grob scale-notes))
+    \override Staff.StaffSymbol.line-count = #(length scale-notes)
+    \override Staff.StaffSymbol.staff-space = #1.0
+    
+    % Hide all traditional notation elements
+    \override NoteHead.stencil = ##f
+    \override Stem.stencil = ##f
+    \override Beam.stencil = ##f
+    \override Flag.stencil = ##f
+    \override Rest.stencil = ##f
+    \override Accidental.stencil = ##f
+    \override Clef.stencil = ##f
+    \override TimeSignature.stencil = ##f
+    \override KeySignature.stencil = ##f
+    \override BarLine.stencil = ##f
+  #})

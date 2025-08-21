@@ -7,6 +7,7 @@
 \include "utils.ly"
 
 #(define MEASURES_PER_SYSTEM 6)
+#(define SCALE REYONG-NOTES)
 
 reyong_notes_display = {
     \key a \major
@@ -70,7 +71,6 @@ reyong_notes_display = {
    }
 }
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
 
 \score {
@@ -78,7 +78,8 @@ reyong_notes_display = {
       % Setting parameters for the Staff context
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
       
-      \gridStaff
+      \gridStaffParams #SCALE
+      \override Staff.StaffSymbol.stencil = #(lambda (grob) (create-grid grob SCALE))
   }  {
      \sliceMusic #7 #12 \all_voices
   }
@@ -99,7 +100,7 @@ reyong_notes_display = {
           % Add the note_collector_engraver to the Staff context
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
-          \consists \note_collector_engraver
+          \consists #(mk-note-collector SCALE)
 	  \omit StaffSymbol
 
       }      
