@@ -20,7 +20,8 @@ autoBreakEngraver =
             (when (ly:grob? col)
               (ly:grob-set-property! col 'line-break-permission 'force))))))))
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% color maps
 
 #(define (square-color voice-id)
   (cond
@@ -29,6 +30,10 @@ autoBreakEngraver =
     ((string=? voice-id "polos_hi") (rgb-color 0.678 0.88 0.898))
     ((string=? voice-id "sangsih_hi") (rgb-color 0.980 0.500 0.564))    
     (else (rgb-color 0.5 0.5 0.5))))
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
+
 
 
 #(define (create-grid grob)
