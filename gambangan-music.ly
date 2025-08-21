@@ -7,7 +7,7 @@
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#(define reyong_notes_low
+#(define REYONG-NOTES-LOW
   (list 
     #{ e'  #}
     #{ u'  #}

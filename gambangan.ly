@@ -7,7 +7,7 @@
 \include "utils.ly"
 
 #(define MEASURES_PER_SYSTEM 6)
-#(define SCALE REYONG-NOTES)
+#(define SCALE REYONG-NOTES-LOW)
 
 reyong_notes_display = {
     \key a \major
