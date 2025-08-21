@@ -22,7 +22,7 @@ autoBreakEngraver =
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% color maps
 
-#(define (square-color voice-id)
+#(define (voice-color-func voice-id notename)
   (cond
     ((string=? voice-id "polos_low") (rgb-color 0.678 0.88 0.898))
     ((string=? voice-id "sangsih_low") (rgb-color 0.980 0.500 0.564))
@@ -30,24 +30,34 @@ autoBreakEngraver =
     ((string=? voice-id "sangsih_hi") (rgb-color 0.980 0.500 0.564))    
     (else (rgb-color 0.5 0.5 0.5))))
 
+#(define (notename-color-func voice-id notename)
+  (cond
+    ((= notename 0) (rgb-color 1.0 0.0 0.0))
+    ((= notename 1) (rgb-color 0.0 0.8 0.0))
+    ((= notename 2) (rgb-color 0.0 0.0 1.0))
+    ((= notename 3) (rgb-color 1.0 1.0 0.0))
+    ((= notename 4) (rgb-color 1.0 0.6 0.0))
+    ((= notename 5) (rgb-color 0.5 0.6 0.5))
+    ((= notename 6) (rgb-color 0.6 0.4 0.2))    
+    (else (rgb-color 0.5 0.5 0.5))))
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
 
-#(define (create-grid grob scale-notes)
-  "Create a grid using notes collected for this specific system"
-  (let* ((staff-space 1.0)
-         (thickness 0.1)
-         (pitches (length scale-notes))
-         (beats-per-measure 16)
-         (cell-size staff-space)
-	 (num-systems (hash-count (const #t) notes-by-system))
-         (current-system (modulo system-counter num-systems))
-         (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
-         (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
-         (grid-height (* pitches cell-size))
-         (system-notes (hash-ref notes-by-system current-system '()))
-         (stencils '()))
-	     
+#(define (mk-create-grid scale-notes color-func)
+  (lambda (grob)
+    (let* ((staff-space 1.0)
+           (thickness 0.1)
+           (pitches (length scale-notes))
+           (beats-per-measure 16)
+           (cell-size staff-space)
+	   (num-systems (hash-count (const #t) notes-by-system))
+           (current-system (modulo system-counter num-systems))
+           (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
+           (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
+           (grid-height (* pitches cell-size))
+           (system-notes (hash-ref notes-by-system current-system '()))
+           (stencils '()))
     ; Increment counter for next system
     (set! system-counter (+ system-counter 1))
         
@@ -89,6 +99,8 @@ autoBreakEngraver =
                (beat-in-measure (cadr note-info))
                (voice-id (caddr note-info))
 	       (note-idx (cadddr note-info))
+	       (notename (list-ref note-info 4))
+	       (zz (display notename))
                (relative-measure (- measure-num system-start-measure))
                (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
                (x-pos (* relative-beat cell-size))
@@ -97,14 +109,14 @@ autoBreakEngraver =
                       (cons 0 cell-size)
                       (cons 0 cell-size)
                       0))
-	       (cell (stencil-with-color cell (square-color voice-id)))
+	       (cell (stencil-with-color cell (color-func voice-id notename)))
                (filled-cell (ly:stencil-translate-axis
                             (ly:stencil-translate-axis cell x-pos X)
                             y-pos Y)))
           (set! stencils (cons filled-cell stencils))))
       system-notes)
     
-    (apply ly:stencil-add stencils)))
+    (apply ly:stencil-add stencils))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Gather notes into a hash table
 
@@ -148,9 +160,9 @@ autoBreakEngraver =
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 gridStaffParams =
-#(define-music-function (scale-notes) (list?)
+#(define-music-function (scale-notes color-func) (list? procedure?)
   #{
-    \override Staff.StaffSymbol.stencil = #(lambda (grob) (create-grid grob scale-notes))
+    \override Staff.StaffSymbol.stencil = #(mk-create-grid scale-notes color-func)
     \override Staff.StaffSymbol.line-count = #(length scale-notes)
     \override Staff.StaffSymbol.staff-space = #1.0
     

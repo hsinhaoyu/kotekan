@@ -77,9 +77,7 @@ reyong_notes_display = {
   \new Staff \with {
       % Setting parameters for the Staff context
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
-      
-      \gridStaffParams #SCALE
-      \override Staff.StaffSymbol.stencil = #(lambda (grob) (create-grid grob SCALE))
+      \gridStaffParams #SCALE #notename-color-func
   }  {
      \sliceMusic #7 #12 \all_voices
   }
