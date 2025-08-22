@@ -100,7 +100,6 @@ autoBreakEngraver =
                (voice-id (caddr note-info))
 	       (note-idx (cadddr note-info))
 	       (notename (list-ref note-info 4))
-	       (zz (display notename))
                (relative-measure (- measure-num system-start-measure))
                (relative-beat (+ (* relative-measure beats-per-measure) beat-in-measure))
                (x-pos (* relative-beat cell-size))

@@ -7,7 +7,7 @@
 \include "utils.ly"
 
 #(define MEASURES_PER_SYSTEM 6)
-#(define SCALE REYONG-NOTES-LOW)
+#(define SCALE REYONG-NOTES)
 
 reyong_notes_display = {
     \key a \major
@@ -43,6 +43,7 @@ reyong_notes_display = {
    \new Staff \with {
         instrumentName = " S. + P."
    } {
+     \key a \major 
      \sliceMusic #7 #12 \low_register
    }
 
@@ -77,13 +78,18 @@ reyong_notes_display = {
   \new Staff \with {
       % Setting parameters for the Staff context
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
-      \gridStaffParams #SCALE #notename-color-func
+      \gridStaffParams #SCALE #voice-color-func
   }  {
-     \sliceMusic #7 #12 \all_voices
+%     \set Score.currentBarNumber = 5
+     \sliceMusic #1 #-1 \all_voices
   }
 
   \header {
-       piece = "The Reyong Kotekan in grid format"
+       piece = \markup {
+           \column {
+               "The Reyong Kotekan in grid format"
+               \vspace #0.5 }
+       }
   }
 
   \layout {
