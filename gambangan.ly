@@ -27,51 +27,51 @@ reyong_notes_display = {
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\score {
-    \new Staff \reyong_notes_display
-    
-    \header {
-        piece = "Approximate Pelog scale for the Reyong" 
-    }
-    
-    \layout {}
-}
+%\score {
+%    \new Staff \reyong_notes_display
+%    
+%    \header {
+%        piece = "Approximate Pelog scale for the Reyong" 
+%    }
+%    
+%    \layout {}
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\score {
-   \new Staff \with {
-        instrumentName = " S. + P."
-   } {
-     \key a \major 
+%\score {
+%   \new Staff \with {
+%        instrumentName = " S. + P."
+%   } {
+%     \key a \major 
 %     \sliceMusic #7 #12 \polos_low
-      \keepWithTag #'section_two \polos_low
-   }
-
-   \header {
-       piece = "Example of Kotekan (interlocked melodies) from McPhee, C. (1940)"
-   }
-   
-   \layout {
-        \context {
-    	    \Voice
-    	    \override Rest.transparent = ##t
-        }
-   }
-
-}
+%      \keepWithTag #'section_two \polos_low
+%   }
+%
+%   \header {
+%       piece = "Example of Kotekan (interlocked melodies) from McPhee, C. (1940)"
+%   }
+%   
+%   \layout {
+%        \context {
+%    	    \Voice
+%    	    \override Rest.transparent = ##t
+%        }
+%   }
+%
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%% MIDI
 
-\score {
-   \new Staff {
-     \sliceMusic #1 #4 \all_voices
-   }
-
-   \midi {
-   	 \tempo 4 = 80
-   }
-}
+%\score {
+%   \new Staff {
+%     \sliceMusic #1 #4 \all_voices
+%   }
+%
+%   \midi {
+%   	 \tempo 4 = 80
+%   }
+%}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
 
@@ -100,7 +100,7 @@ reyong_notes_display = {
 	  % It breaks the music into systems
           \Score
 	  \consists \autoBreakEngraver
-	  %currentBarNumber = #6
+	  \override System.after-line-breaking = #system-after-line-breaking
       }
 
       \context {
@@ -108,6 +108,7 @@ reyong_notes_display = {
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
           \consists #(mk-note-collector SCALE)
+	  \override StaffSymbol.after-line-breaking = #staffsymbol-after-line-breaking
 	  \omit StaffSymbol
       }      
       indent = 0

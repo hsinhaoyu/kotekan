@@ -52,14 +52,15 @@ autoBreakEngraver =
            (beats-per-measure 16)
            (cell-size staff-space)
 	   (num-systems (hash-count (const #t) notes-by-system))
-           (current-system (modulo system-counter num-systems))
+           ; (current-system (modulo system-counter num-systems))
+	   (current-system (hashq-ref staffsymbol-index-table grob #f))
            (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
            (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
            (grid-height (* pitches cell-size))
            (system-notes (hash-ref notes-by-system current-system '()))
            (stencils '()))
     ; Increment counter for next system
-    (set! system-counter (+ system-counter 1))
+    ;(set! system-counter (+ system-counter 1))
         
     ; Draw horizontal lines
     (do ((i 0 (1+ i)))
@@ -155,6 +156,31 @@ autoBreakEngraver =
 	  (when note-index
 	      (hash-set! notes-by-system system-num (cons all-info current-notes)))
 	  (ly:grob-set-property! grob 'stencil empty-stencil)))))))
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+#(define system-index-table (make-hash-table))
+#(define s-counter -1)
+
+#(define (ensure-system-index sys)
+  (let ((idx (and sys (hashq-ref system-index-table sys #f))))
+    (if idx
+        idx
+        (begin
+          (set! s-counter (+ s-counter 1)) 
+          (hashq-set! system-index-table sys s-counter)
+          s-counter))))
+
+#(define (system-after-line-breaking sys)
+   (let ((idx (ensure-system-index sys)))
+     (format #t "System finalized, index ~a\n" idx)))
+
+#(define staffsymbol-index-table (make-hash-table))
+
+#(define (staffsymbol-after-line-breaking ss)
+   (let* ((sys (ly:grob-system ss))
+          (idx (ensure-system-index sys)))
+     (hashq-set! staffsymbol-index-table ss idx)
+     (format #t "StaffSymbol finalized with system-index=~a\n" idx)))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
