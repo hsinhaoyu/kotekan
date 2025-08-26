@@ -44,7 +44,8 @@ reyong_notes_display = {
         instrumentName = " S. + P."
    } {
      \key a \major 
-     \sliceMusic #7 #12 \low_register
+%     \sliceMusic #7 #12 \polos_low
+      \keepWithTag #'section_two \polos_low
    }
 
    \header {
@@ -64,7 +65,7 @@ reyong_notes_display = {
 
 \score {
    \new Staff {
-     \sliceMusic #7 #12 \low_register
+     \sliceMusic #1 #4 \all_voices
    }
 
    \midi {
@@ -81,7 +82,8 @@ reyong_notes_display = {
       \gridStaffParams #SCALE #voice-color-func
   }  {
 %     \set Score.currentBarNumber = 5
-     \sliceMusic #1 #-1 \all_voices
+%     \sliceMusic #1 #-1 \all_voices
+      \all_voices
   }
 
   \header {
@@ -98,6 +100,7 @@ reyong_notes_display = {
 	  % It breaks the music into systems
           \Score
 	  \consists \autoBreakEngraver
+	  %currentBarNumber = #6
       }
 
       \context {
@@ -106,7 +109,6 @@ reyong_notes_display = {
           \Staff
           \consists #(mk-note-collector SCALE)
 	  \omit StaffSymbol
-
       }      
       indent = 0
   }

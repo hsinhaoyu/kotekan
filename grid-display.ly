@@ -43,7 +43,7 @@ autoBreakEngraver =
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
-
+%% Turns a grob into a stencil
 #(define (mk-create-grid scale-notes color-func)
   (lambda (grob)
     (let* ((staff-space 1.0)
