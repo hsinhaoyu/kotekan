@@ -125,6 +125,14 @@ autoBreakEngraver =
          (ly:pitch-alteration p)
          (ly:pitch-octave p)))
 
+#(define get-init-bar-num
+   (let ((bar-num-0 #f))
+     (lambda (current-bar-number)
+       (if bar-num-0
+           bar-num-0
+           (begin (set! bar-num-0 current-bar-number)
+                  bar-num-0)))))
+
 #(define (mk-note-collector scale-notes)
   (let* ((scale-notes-components (map pitch->components scale-notes))
          (note->index (lambda (notename alteration octave)
@@ -142,15 +150,14 @@ autoBreakEngraver =
 	       (note-index (note->index notename alteration octave))
                (context (ly:translator-context engraver))
                (measure-num (ly:context-property context 'currentBarNumber 1))
+	       (init-measure-num (get-init-bar-num measure-num))
+	       (measure-num (1+ (- measure-num init-measure-num)))
                (moment (ly:context-current-moment context))
                (beat-pos (ly:moment-main moment))
                (beat-in-measure (modulo (inexact->exact (floor (* beat-pos 16))) 16))
-               ; Calculate which system this note belongs to
                (system-num (quotient (- measure-num 1) MEASURES_PER_SYSTEM))
-	       ; Get the voice id
 	       (voice-context (ly:translator-context source-engraver))
 	       (voice-id (ly:context-id voice-context))
-	       ; All the info needed
 	       (all-info (list measure-num beat-in-measure voice-id note-index notename alteration octave))
 	       (current-notes (hash-ref notes-by-system system-num '())))
 	  (when note-index

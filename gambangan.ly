@@ -81,7 +81,7 @@ reyong_notes_display = {
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
       \gridStaffParams #SCALE #voice-color-func
   }  {
-%     \set Score.currentBarNumber = 5
+     \set Score.currentBarNumber = 5
 %     \sliceMusic #1 #-1 \all_voices
       \all_voices
   }
