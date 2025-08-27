@@ -1,6 +1,5 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Global variables
 
-#(define system-counter 1)
 #(define notes-by-system (make-hash-table))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -52,15 +51,12 @@ autoBreakEngraver =
            (beats-per-measure 16)
            (cell-size staff-space)
 	   (num-systems (hash-count (const #t) notes-by-system))
-           ; (current-system (modulo system-counter num-systems))
 	   (current-system (hashq-ref staffsymbol-index-table grob #f))
            (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
            (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
            (grid-height (* pitches cell-size))
            (system-notes (hash-ref notes-by-system current-system '()))
            (stencils '()))
-    ; Increment counter for next system
-    ;(set! system-counter (+ system-counter 1))
         
     ; Draw horizontal lines
     (do ((i 0 (1+ i)))
