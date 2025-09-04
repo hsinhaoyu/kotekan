@@ -45,7 +45,7 @@ autoBreakEngraver =
 %% Turns a grob into a stencil
 #(define (mk-create-grid scale-notes color-func)
   (lambda (grob)
-    (let* ((staff-space 1.0)
+    (let* ((staff-space 0.9)
            (thickness 0.1)
            (pitches (length scale-notes))
            (beats-per-measure 16)
