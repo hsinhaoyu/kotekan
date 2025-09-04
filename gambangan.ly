@@ -82,6 +82,9 @@ reyong_notes_display = {
       \gridStaffParams #SCALE #voice-color-func
   }  {
      \set Score.currentBarNumber = 5
+     \override Score.BarNumber.break-visibility = ##(#f #t #t)
+     \override Score.BarNumber.stencil = #my-bar-number-stencil
+
 %     \sliceMusic #1 #-1 \all_voices
       \all_voices
   }

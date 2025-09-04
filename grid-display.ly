@@ -69,7 +69,7 @@ autoBreakEngraver =
         (set! stencils
               (cons (stencil-with-color
 	                (ly:stencil-translate-axis line y-pos Y)
-		        (rgb-color 0.1 0.1 0.1))
+		        (rgb-color 0.6 0.6 0.6))
                     stencils))))
     
     ; Draw vertical lines for beats
@@ -86,7 +86,7 @@ autoBreakEngraver =
         (set! stencils
               (cons (stencil-with-color
 	                (ly:stencil-translate-axis line x-pos X)
-			(rgb-color 0.1 0.1 0.1))
+			(rgb-color 0.6 0.6 0.6))
                     stencils))))
     
     ; Fill cells for notes in this system
@@ -184,6 +184,41 @@ autoBreakEngraver =
           (idx (ensure-system-index sys)))
      (hashq-set! staffsymbol-index-table ss idx)
      (format #t "StaffSymbol finalized with system-index=~a\n" idx)))
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+#(define (bn-x-offset-sp grob sp)
+   (let* ((ctx (ly:grob-context grob))
+          (bar (ly:context-property ctx 'currentBarNumber 0))
+          (digits (string-length (number->string (max 1 bar)))))
+     (+ 2.0 (* 0.25 digits))) )  
+
+#(define (staff-left-x sys grob)
+   (let* ((vagg  (ly:grob-parent grob Y))    
+          (staff (and vagg (ly:grob-object vagg 'staff-symbol))))
+     (cond
+       ((and staff (ly:grob? staff))
+        (car (ly:grob-extent staff sys X)))                  
+       (else
+        (car (ly:grob-extent sys sys X))))) )                
+
+#(define (my-bar-number-stencil grob)
+   (let* ((st     (ly:text-interface::print grob))           
+          (sys    (ly:grob-system grob))
+          (layout (and grob (ly:grob-layout grob)))
+          (sp     (and layout (ly:output-def-lookup layout 'staff-space))))
+
+(display grob)
+
+     (if (and (ly:stencil? st) sys sp)
+         (let* ((anchor-left (staff-left-x sys grob))        
+                (bn-x        (ly:grob-relative-coordinate grob sys X))
+                (target-x    (+ anchor-left (* sp (bn-x-offset-sp grob sp))))
+                (delta       (- target-x bn-x)))
+           (ly:stencil-translate-axis st delta X))
+         st)))
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
