@@ -80,13 +80,13 @@ reyong_notes_display = {
     	 systemStartDelimiter = #'SystemStartBrace 
     } <<
        \new Staff \with {
-       	    \gridStaffParams #SCALE #voice-color-func
+       	    \gridStaffParams #SCALE #voice-color-func #'("Polos" "Sangsih") #0
 	    instrumentName = "Polos"
 	    shortInstrumentName = "Polos"
        }  { \polos_low }
        
        \new Staff \with {
-       	    \gridStaffParams #SCALE #notename-color-func
+       	    \gridStaffParams #SCALE #notename-color-func #'("Polos" "Sangsih") #1
 	    instrumentName = "Sangsih"
 	    shortInstrumentName = "Sangsih"
        }  { \polos_hi }       

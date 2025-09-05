@@ -51,7 +51,7 @@ autoBreakEngraver =
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Plotting the grid
 %% Turns a grob into a stencil
-#(define (mk-create-grid scale-notes color-func)
+#(define (mk-create-grid scale-notes color-func instrument-names instrument-idx)
   (lambda (grob)
     (let* ((staff-space 0.9)
            (thickness 0.1)
@@ -62,7 +62,8 @@ autoBreakEngraver =
            (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
            (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
            (grid-height (* pitches cell-size))
-           (system-notes (hash-ref notes-by-system current-system '()))
+           (composite-key (cons current-system instrument-idx))
+           (system-notes (hash-ref notes-by-system composite-key '()))
            (stencils '()))
 
 (display "\n")
@@ -170,14 +171,13 @@ autoBreakEngraver =
 	       (staff-context (ly:translator-context engraver))
 	       (instrument-name (ly:context-property staff-context 'instrumentName ""))
 	       (instrument-idx (list-index (lambda (x) (string=? x instrument-name)) instrument-names))
-	       (hash-idx (+ (* system-num (length instrument-names)) instrument-idx))
-	       (zzzzz (format #t "measure n:~a\tsys n:~a\t~a\t~a\t~a \n" measure-num system-num instrument-name instrument-idx hash-idx))
 
+	       (composite-key (cons system-num instrument-idx))
 	       (all-info (list measure-num beat-in-measure voice-id note-index notename alteration octave))
-	       (current-notes (hash-ref notes-by-system hash-idx '())))
+	       (current-notes (hash-ref notes-by-system composite-key '())))
 
 	  (when note-index
-	      (hash-set! notes-by-system hash-idx (cons all-info current-notes)))
+	      (hash-set! notes-by-system composite-key (cons all-info current-notes)))
 	  (ly:grob-set-property! grob 'stencil empty-stencil)))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -248,9 +248,9 @@ autoBreakEngraver =
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 gridStaffParams =
-#(define-music-function (scale-notes color-func) (list? procedure?)
+#(define-music-function (scale-notes color-func instrument-names instrument-idx) (list? procedure? list? number?)
   #{
-    \override Staff.StaffSymbol.stencil = #(mk-create-grid scale-notes color-func)
+    \override Staff.StaffSymbol.stencil = #(mk-create-grid scale-notes color-func instrument-names instrument-idx)
     \override Staff.StaffSymbol.line-count = #(length scale-notes)
     \override Staff.StaffSymbol.staff-space = #1.0
     
