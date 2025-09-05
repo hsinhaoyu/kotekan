@@ -129,6 +129,7 @@ autoBreakEngraver =
            (begin (set! bar-num-0 current-bar-number)
                   bar-num-0)))))
 
+% NOTE: system-num is the index of "systems", which can be a staff group with multiple staffs in it
 #(define (mk-note-collector scale-notes)
   (let* ((scale-notes-components (map pitch->components scale-notes))
          (note->index (lambda (notename alteration octave)
