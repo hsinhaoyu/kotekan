@@ -7,6 +7,7 @@
 % This engraver is attached to the Score context
 % This engraver can encounter the same bar number multiple times, because
 % There might be more than one instruments.  Addressed by a hash table.
+
 autoBreakEngraver =
 #(let ((count 0)
        (seen-measures (make-hash-table)))
