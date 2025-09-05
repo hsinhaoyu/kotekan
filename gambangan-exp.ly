@@ -86,7 +86,7 @@ reyong_notes_display = {
        }  { \polos_low }
        
        \new Staff \with {
-       	    \gridStaffParams #SCALE #voice-color-func
+       	    \gridStaffParams #SCALE #notename-color-func
 	    instrumentName = "Sangsih"
 	    shortInstrumentName = "Sangsih"
        }  { \polos_hi }       

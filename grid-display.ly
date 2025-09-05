@@ -5,18 +5,26 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % This engraver is attached to the Score context
+% This engraver can encounter the same bar number multiple times, because
+% There might be more than one instruments.  Addressed by a hash table.
 autoBreakEngraver =
-#(let ((count 0))
+#(let ((count 0)
+       (seen-measures (make-hash-table)))
    (make-engraver
      (acknowledgers
        ((bar-line-interface engraver grob source-engraver)
-        (set! count (+ count 1))
-        (when (and (> MEASURES_PER_SYSTEM 0)
-                   (zero? (modulo count MEASURES_PER_SYSTEM)))
-          (let* ((ctx (ly:translator-context engraver))
-                 (col (ly:context-property ctx 'currentCommandColumn)))
-            (when (ly:grob? col)
-              (ly:grob-set-property! col 'line-break-permission 'force))))))))
+        (let* ((ctx (ly:translator-context engraver))
+               (measure-num (ly:context-property ctx 'currentBarNumber 1)))
+          (unless (hash-ref seen-measures measure-num #f)
+            (hash-set! seen-measures measure-num #t)
+            (set! count (+ count 1))
+            (format #t "count=~a " count)
+            (when (and (> MEASURES_PER_SYSTEM 0)
+                       (zero? (modulo count MEASURES_PER_SYSTEM)))
+              (let ((col (ly:context-property ctx 'currentCommandColumn)))
+                (when (ly:grob? col)
+                  (display "break\n")
+                  (ly:grob-set-property! col 'line-break-permission 'force)))))))))))
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% color maps
@@ -129,7 +137,6 @@ autoBreakEngraver =
            (begin (set! bar-num-0 current-bar-number)
                   bar-num-0)))))
 
-% NOTE: system-num is the index of "systems", which can be a staff group with multiple staffs in it
 #(define (mk-note-collector scale-notes)
   (let* ((scale-notes-components (map pitch->components scale-notes))
          (note->index (lambda (notename alteration octave)
