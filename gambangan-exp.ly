@@ -106,7 +106,7 @@ reyong_notes_display = {
           % Add the note_collector_engraver to the Staff context
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
-          \consists #(mk-note-collector SCALE)
+          \consists #(mk-note-collector SCALE '("Polos" "Sangsih"))
 	  \override StaffSymbol.after-line-breaking = #staffsymbol-after-line-breaking
 	  \omit StaffSymbol
       }

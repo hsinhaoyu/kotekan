@@ -1,3 +1,5 @@
+#(use-modules (srfi srfi-1))
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%% Global variables
 
 #(define notes-by-system (make-hash-table))
@@ -19,14 +21,11 @@ autoBreakEngraver =
           (unless (hash-ref seen-measures measure-num #f)
             (hash-set! seen-measures measure-num #t)
             (set! count (+ count 1))
-            (format #t "count=~a " count)
             (when (and (> MEASURES_PER_SYSTEM 0)
                        (zero? (modulo count MEASURES_PER_SYSTEM)))
               (let ((col (ly:context-property ctx 'currentCommandColumn)))
                 (when (ly:grob? col)
-                  (display "break\n")
-                  (ly:grob-set-property! col 'line-break-permission 'force)))))))))))
-
+                  (ly:grob-set-property! col 'line-break-permission 'force))))))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% color maps
 
@@ -59,13 +58,17 @@ autoBreakEngraver =
            (pitches (length scale-notes))
            (beats-per-measure 16)
            (cell-size staff-space)
-	   (num-systems (hash-count (const #t) notes-by-system))
 	   (current-system (hashq-ref staffsymbol-index-table grob #f))
            (system-start-measure (+ (* current-system MEASURES_PER_SYSTEM) 1))
            (grid-width (* MEASURES_PER_SYSTEM beats-per-measure cell-size))
            (grid-height (* pitches cell-size))
            (system-notes (hash-ref notes-by-system current-system '()))
            (stencils '()))
+
+(display "\n")
+(display grob)
+(display color-func)
+(display "\n")
         
     ; Draw horizontal lines
     (do ((i 0 (1+ i)))
@@ -138,7 +141,7 @@ autoBreakEngraver =
            (begin (set! bar-num-0 current-bar-number)
                   bar-num-0)))))
 
-#(define (mk-note-collector scale-notes)
+#(define (mk-note-collector scale-notes instrument-names)
   (let* ((scale-notes-components (map pitch->components scale-notes))
          (note->index (lambda (notename alteration octave)
                         (list-index
@@ -163,13 +166,25 @@ autoBreakEngraver =
                (system-num (quotient (- measure-num 1) MEASURES_PER_SYSTEM))
 	       (voice-context (ly:translator-context source-engraver))
 	       (voice-id (ly:context-id voice-context))
+
+	       (staff-context (ly:translator-context engraver))
+	       (instrument-name (ly:context-property staff-context 'instrumentName ""))
+	       (instrument-idx (list-index (lambda (x) (string=? x instrument-name)) instrument-names))
+	       (hash-idx (+ (* system-num (length instrument-names)) instrument-idx))
+	       (zzzzz (format #t "measure n:~a\tsys n:~a\t~a\t~a\t~a \n" measure-num system-num instrument-name instrument-idx hash-idx))
+
 	       (all-info (list measure-num beat-in-measure voice-id note-index notename alteration octave))
-	       (current-notes (hash-ref notes-by-system system-num '())))
+	       (current-notes (hash-ref notes-by-system hash-idx '())))
+
 	  (when note-index
-	      (hash-set! notes-by-system system-num (cons all-info current-notes)))
+	      (hash-set! notes-by-system hash-idx (cons all-info current-notes)))
 	  (ly:grob-set-property! grob 'stencil empty-stencil)))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% system-index-table: map system to system index
+% staffsymbol-index-table: map staffsymbol to system index
+% in lilypond, a system can have multiple staffs 
+
 #(define system-index-table (make-hash-table))
 #(define s-counter -1)
 
@@ -182,6 +197,7 @@ autoBreakEngraver =
           (hashq-set! system-index-table sys s-counter)
           s-counter))))
 
+% sys is a sys grob, which might have multiple instrumemts
 #(define (system-after-line-breaking sys)
    (let ((idx (ensure-system-index sys)))
      (format #t "System finalized, index ~a\n" idx)))
