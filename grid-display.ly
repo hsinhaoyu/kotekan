@@ -171,6 +171,7 @@ autoBreakEngraver =
 	       (staff-context (ly:translator-context engraver))
 	       (instrument-name (ly:context-property staff-context 'instrumentName ""))
 	       (instrument-idx (list-index (lambda (x) (string=? x instrument-name)) instrument-names))
+	       (instrument-idx (or instrument-idx 0)) 
 
 	       (composite-key (cons system-num instrument-idx))
 	       (all-info (list measure-num beat-in-measure voice-id note-index notename alteration octave))
@@ -220,13 +221,12 @@ autoBreakEngraver =
      (+ 2.0 (* 0.25 digits))) )  
 
 #(define (staff-left-x sys grob)
-   (let* ((vagg  (ly:grob-parent grob Y))    
-          (staff (and vagg (ly:grob-object vagg 'staff-symbol))))
+   (let* ((vagg  (ly:grob-parent grob Y)))
      (cond
-       ((and staff (ly:grob? staff))
-        (car (ly:grob-extent staff sys X)))                  
+       ((and vagg (ly:grob? vagg))
+        (car (ly:grob-extent vagg sys X)))                  
        (else
-        (car (ly:grob-extent sys sys X))))) )                
+        0.0))) )                
 
 #(define (my-bar-number-stencil grob)
    (let* ((st     (ly:text-interface::print grob))           
@@ -236,7 +236,7 @@ autoBreakEngraver =
 
 (display grob)
 
-     (if (and (ly:stencil? st) sys sp)
+     (if (and (ly:stencil? st) sys sp (ly:grob? sys))
          (let* ((anchor-left (staff-left-x sys grob))        
                 (bn-x        (ly:grob-relative-coordinate grob sys X))
                 (target-x    (+ anchor-left (* sp (bn-x-offset-sp grob sp))))

@@ -79,7 +79,7 @@ reyong_notes_display = {
   \new Staff \with {
       % Setting parameters for the Staff context
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
-      \gridStaffParams #SCALE #voice-color-func
+      \gridStaffParams #SCALE #voice-color-func #'() #0
   }  {
      \set Score.currentBarNumber = 5
      \override Score.BarNumber.break-visibility = ##(#f #t #t)
@@ -110,7 +110,7 @@ reyong_notes_display = {
           % Add the note_collector_engraver to the Staff context
 	  % It disables plotting traditional notes, and saves all pitch information in a hash table
           \Staff
-          \consists #(mk-note-collector SCALE)
+          \consists #(mk-note-collector SCALE '())
 	  \override StaffSymbol.after-line-breaking = #staffsymbol-after-line-breaking
 	  \omit StaffSymbol
       }      
