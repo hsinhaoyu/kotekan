@@ -214,36 +214,93 @@ autoBreakEngraver =
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-#(define (bn-x-offset-sp grob sp)
-   (let* ((ctx (ly:grob-context grob))
-          (bar (ly:context-property ctx 'currentBarNumber 0))
-          (digits (string-length (number->string (max 1 bar)))))
-     (+ 2.0 (* 0.25 digits))) )  
+#(define MEASURES-PER-SYSTEM   6)     
+#(define BEATS-PER-MEASURE    16)     
+#(define CELL-SIZE           0.90)    
+#(define FIRST-BAR-NUMBER    1)
+#(define BAR-BOTTOM-PAD-SP   0.18)
+#(define NUMBER-FONTSIZE    -1)
 
-#(define (staff-left-x sys grob)
-   (let* ((vagg  (ly:grob-parent grob Y)))
-     (cond
-       ((and vagg (ly:grob? vagg))
-        (car (ly:grob-extent vagg sys X)))                  
-       (else
-        0.0))) )                
+#(define (pair?* x) (and (pair? x) #t))
 
-#(define (my-bar-number-stencil grob)
-   (let* ((st     (ly:text-interface::print grob))           
-          (sys    (ly:grob-system grob))
-          (layout (and grob (ly:grob-layout grob)))
-          (sp     (and layout (ly:output-def-lookup layout 'staff-space))))
+#(define (extent-left grob frame)
+  (let ((e (and (ly:grob? grob) (ly:grob? frame) (ly:grob-extent grob frame X))))
+    (and (pair?* e) (car e))))
 
-(display grob)
+#(define (extent-top  grob frame)
+  (let ((e (and (ly:grob? grob) (ly:grob? frame) (ly:grob-extent grob frame Y))))
+    (and (pair?* e) (cdr e))))
 
-     (if (and (ly:stencil? st) sys sp (ly:grob? sys))
-         (let* ((anchor-left (staff-left-x sys grob))        
-                (bn-x        (ly:grob-relative-coordinate grob sys X))
-                (target-x    (+ anchor-left (* sp (bn-x-offset-sp grob sp))))
-                (delta       (- target-x bn-x)))
-           (ly:stencil-translate-axis st delta X))
-         st)))
+#(define (staff-space grob)
+  (and (ly:grob-layout grob)
+       (ly:output-def-lookup (ly:grob-layout grob) 'staff-space)))
 
+#(define (mk-number-stencil grob str)
+  (grob-interpret-markup grob (markup #:fontsize NUMBER-FONTSIZE str)))
+
+
+#(define (translate-stencil st dx dy)
+  (and (ly:stencil? st) (ly:stencil-translate st (cons dx dy)) st))
+
+% return a grob
+#(define (system-top-staffsymbol sys)
+  (let* ((elts (ly:grob-object sys 'elements))
+         (lst  (and (ly:grob-array? elts) (ly:grob-array->list elts))))
+    (and (pair? lst)
+         (let loop ((xs lst))
+           (and (pair? xs)
+                (let* ((g      (car xs))
+                       (meta   (ly:grob-property g 'meta))
+                       (staves (ly:grob-object g 'staves)))
+                  (cond
+                    ((eq? meta 'StaffSymbol) g)
+                    ((ly:grob-array? staves)
+                     (let* ((sl (ly:grob-array->list staves)))
+                       (and (pair? sl) (car sl))))
+                    (else (loop (cdr xs))))))))))
+
+
+#(define system-counter -1)
+#(define system-index (make-hash-table))
+#(define (ensure-system-index sys)
+  (let ((idx (hashq-ref system-index sys #f)))
+    (if idx
+        idx
+        (begin
+          (set! system-counter (+ system-counter 1))
+          (hashq-set! system-index sys system-counter)
+          system-counter))))
+
+#(define (system-with-grid-nums sys)
+  (let* ((top-staff (system-top-staffsymbol sys))
+         (left-x    0)
+         (sp        (staff-space sys))
+         (system-extent (ly:grob-extent sys sys Y))
+         (system-top    (if (pair? system-extent) (cdr system-extent) 0))
+         (top-y         (+ system-top (* 0.5 sp))))
+    (format #t "HERE ~a ~a ~a\n" left-x top-y sp)
+    
+    (if (or (not (number? left-x))
+            (not (number? top-y))
+            (not (number? sp)))
+        (ly:make-stencil '() '(0 . 0) '(0 . 0))
+        (let* ((sys-idx (ensure-system-index sys))
+               (bn0     (+ FIRST-BAR-NUMBER (* sys-idx MEASURES-PER-SYSTEM)))
+               (baseline (+ top-y (* BAR-BOTTOM-PAD-SP sp)))
+               (nums
+                (let loop ((i 0) (acc '()))
+                  (if (>= i MEASURES-PER-SYSTEM)
+                      acc
+                      (let* ((bn  (+ bn0 i))
+                             (x   (+ left-x (* i BEATS-PER-MEASURE CELL-SIZE)))
+                             (st  (mk-number-stencil sys (number->string bn)))
+                             (ext (and (ly:stencil? st) (ly:stencil-extent st Y)))
+                             (ymin (and (pair?* ext) (car ext)))
+                             (dy  (if (number? ymin) (- baseline ymin) baseline))
+                             (placed (and (ly:stencil? st)
+                                          (ly:stencil-translate st (cons x dy)))))
+                        (loop (+ i 1) (cons placed acc)))))))
+          (apply ly:stencil-add (filter ly:stencil? nums))))))
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 

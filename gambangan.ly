@@ -75,15 +75,32 @@ reyong_notes_display = {
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
 
+%\paper {
+%  system-system-spacing =
+%    #'((basic-distance .   15)   % minimal gap
+%       (minimum-distance . 15)  % how close it may shrink
+%       (padding . 0)           % extra padding
+%       (stretchability . 0))  % flexibility for justification
+%}
+
+  \paper {
+    ragged-bottom = ##t
+    system-system-spacing =
+      #'((basic-distance . 13)
+         (minimum-distance . 13)
+         (padding . 0)
+         (stretchability . 0))
+  }
+
 \score {
   \new Staff \with {
       % Setting parameters for the Staff context
       % Importantly, it customises the Staff.StaffSymbol stencil to actually plot the grids
       \gridStaffParams #SCALE #voice-color-func #'() #0
   }  {
-     \set Score.currentBarNumber = 5
-     \override Score.BarNumber.break-visibility = ##(#f #t #t)
-     \override Score.BarNumber.stencil = #my-bar-number-stencil
+%     \set Score.currentBarNumber = 5
+%     \override Score.BarNumber.break-visibility = ##(#f #t #t)
+%     \override Score.BarNumber.stencil = #my-bar-number-stencil
 
 %     \sliceMusic #1 #-1 \all_voices
       \all_voices
@@ -99,11 +116,12 @@ reyong_notes_display = {
 
   \layout {
       \context {
-          % Add the autoBreakEngraver engraver to the Score context.
-	  % It breaks the music into systems
           \Score
 	  \consists \autoBreakEngraver
 	  \override System.after-line-breaking = #system-after-line-breaking
+	  \override BarNumber.stencil = ##f
+	  %\override System.stencil = #system-with-grid-nums
+	  %\remove VerticalAxisGroup_engraver
       }
 
       \context {
@@ -113,7 +131,9 @@ reyong_notes_display = {
           \consists #(mk-note-collector SCALE '())
 	  \override StaffSymbol.after-line-breaking = #staffsymbol-after-line-breaking
 	  \omit StaffSymbol
-      }      
+	  \remove Rest_collision_engraver
+      }
+
       indent = 0
   }
 
