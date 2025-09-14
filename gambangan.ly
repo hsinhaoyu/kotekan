@@ -75,22 +75,14 @@ reyong_notes_display = {
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Engrave in grid format
 
-%\paper {
-%  system-system-spacing =
-%    #'((basic-distance .   15)   % minimal gap
-%       (minimum-distance . 15)  % how close it may shrink
-%       (padding . 0)           % extra padding
-%       (stretchability . 0))  % flexibility for justification
-%}
-
-  \paper {
+\paper {
     ragged-bottom = ##t
     system-system-spacing =
-      #'((basic-distance . 13)
-         (minimum-distance . 13)
+      #'((basic-distance . 15)
+         (minimum-distance . 15)
          (padding . 0)
          (stretchability . 0))
-  }
+}
 
 \score {
   \new Staff \with {
@@ -110,7 +102,7 @@ reyong_notes_display = {
        piece = \markup {
            \column {
                "The Reyong Kotekan in grid format"
-               \vspace #0.5 }
+               \vspace #0.8 }
        }
   }
 
@@ -120,7 +112,7 @@ reyong_notes_display = {
 	  \consists \autoBreakEngraver
 	  \override System.after-line-breaking = #system-after-line-breaking
 	  \override BarNumber.stencil = ##f
-	  %\override System.stencil = #system-with-grid-nums
+	  \override System.stencil = #system-with-grid-nums
 	  %\remove VerticalAxisGroup_engraver
       }
 
